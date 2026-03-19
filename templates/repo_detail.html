@@ -1,0 +1,140 @@
+    <!-- Repo Header -->
+    <header class="gradient-hero text-white">
+        <div class="max-w-6xl mx-auto px-6 py-12">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="relative">
+                    {{score_ring}}
+                    <div class="absolute inset-0 flex flex-col items-center justify-center" style="transform: rotate(0deg)">
+                        <span class="text-2xl font-bold">{{score}}</span>
+                        <span class="text-[10px] text-gray-300 uppercase tracking-wider">Score</span>
+                    </div>
+                </div>
+                <div class="text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+                        <h1 class="text-3xl font-bold">{{repo_name}}</h1>
+                        <a href="{{repo_url}}" target="_blank" class="text-gray-300 hover:text-white transition-colors" title="View on GitHub">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <p class="text-gray-300 mb-3">{{repo_desc}}</p>
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                        {{rec_badge}}
+                        {{complexity_badge}}
+                        <span class="text-xs text-gray-400">{{category}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-12 space-y-10">
+
+        <!-- Stats Row -->
+        <section class="section">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-800 dark:text-gray-100">&#9733; {{stars}}</div>
+                    <div class="text-xs text-gray-400 mt-1">Stars</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-800 dark:text-gray-100">&#9741; {{forks}}</div>
+                    <div class="text-xs text-gray-400 mt-1">Forks</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{open_issues}}</div>
+                    <div class="text-xs text-gray-400 mt-1">Open Issues</div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{last_activity}}</div>
+                    <div class="text-xs text-gray-400 mt-1">Last Activity</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Languages -->
+        <section class="section">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Languages</h2>
+                {{language_bar}}
+            </div>
+        </section>
+
+        <!-- Infrastructure -->
+        <section class="section">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                Infrastructure
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {{infra_grid}}
+                </div>
+            </div>
+        </section>
+
+        <!-- PR & Issue Stats -->
+        <section class="section">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                </div>
+                Pull Requests &amp; Issues
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                {{pr_stats_html}}
+            </div>
+        </section>
+
+        <!-- Commit History -->
+        <section class="section">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                </div>
+                Recent Commits
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                {{commit_table}}
+            </div>
+        </section>
+
+        <!-- Code Observations -->
+        <section class="section">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </div>
+                Code Observations {{ai_indicator}}
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                {{observations}}
+            </div>
+        </section>
+
+        <!-- Strengths & Improvements -->
+        <section class="section">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
+                    {{strengths}}
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
+                    {{improvements}}
+                </div>
+            </div>
+        </section>
+
+        <!-- Verdict -->
+        <section class="section">
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 text-white">
+                <h2 class="text-xl font-bold mb-3">Verdict</h2>
+                <p class="text-gray-200 leading-relaxed">{{verdict}}</p>
+            </div>
+        </section>
+
+    </main>

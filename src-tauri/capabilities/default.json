@@ -1,0 +1,10 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities for GitHub Review",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open",
+    "core:webview:allow-print"
+  ]
+}

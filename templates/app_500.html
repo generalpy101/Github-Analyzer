@@ -1,0 +1,21 @@
+{% extends "app_base.html" %}
+{% set active_page = "" %}
+{% block title %}Server Error — GitHub Review{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-6 py-24 text-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-10">
+        <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-red-50 flex items-center justify-center">
+            <svg class="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Something Went Wrong</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">An unexpected error occurred. Please try again.</p>
+        <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-800 text-white rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

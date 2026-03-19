@@ -1,0 +1,44 @@
+# --- Local app config / data ---
+config.json
+github_review.db
+*.db
+*.db-shm
+*.db-wal
+runtime/config/
+runtime/db/
+runtime/data/
+runtime/output/
+data/
+output/
+
+# --- JavaScript / Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Python ---
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.spec
+build/
+dist/
+
+# --- Tauri / Rust ---
+src-tauri/target/
+target/
+src-tauri/binaries/
+
+# --- Env / OS / editor ---
+.env
+.env.*
+.DS_Store
+.idea/
+.vscode/
+.claude/

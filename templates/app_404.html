@@ -1,0 +1,39 @@
+{% extends "app_base.html" %}
+{% set active_page = "" %}
+{% block title %}Not Found — GitHub Review{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-6 py-24 text-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-10">
+        {% if run and run.status == 'pending' %}
+        <!-- In-progress run -->
+        <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-blue-50 flex items-center justify-center">
+            <svg class="w-7 h-7 text-blue-500 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Review In Progress</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ message }}</p>
+        <div class="flex gap-3 justify-center">
+            <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-800 text-white rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back to Home
+            </a>
+        </div>
+        {% else %}
+        <!-- Not found / cancelled -->
+        <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-amber-50 flex items-center justify-center">
+            <svg class="w-7 h-7 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Page Not Found</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ message }}</p>
+        <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-800 text-white rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Home
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
