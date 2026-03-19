@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def _load_prompt():
@@ -111,8 +112,8 @@ def _call_openai(prompt, data_json, config):
     return response.choices[0].message.content
 
 
-def _call_ollama(prompt, data_json, config):
-    """Call Ollama local API, with optional thinking mode."""
+def _call_ollama(prompt, data_json, config, on_stream=None):
+    """Call Ollama local API, with optional thinking mode and streaming."""
     import requests
 
     thinking = config.get("extended_thinking", False)
@@ -123,6 +124,8 @@ def _call_ollama(prompt, data_json, config):
     if thinking:
         options["num_predict"] = 32000
 
+    use_stream = on_stream is not None
+
     payload = {
         "model": config.get("model", "llama3.1"),
         "messages": [
@@ -130,22 +133,42 @@ def _call_ollama(prompt, data_json, config):
             {"role": "user", "content": user_msg},
         ],
         "format": "json",
-        "stream": False,
+        "stream": use_stream,
         "options": options,
     }
 
     if thinking:
         payload["think"] = True
 
-    response = requests.post(url + "/api/chat", json=payload, timeout=900)
+    if not use_stream:
+        response = requests.post(url + "/api/chat", json=payload, timeout=900)
+        response.raise_for_status()
+        return response.json()["message"]["content"]
+
+    full_text = ""
+    token_count = 0
+    response = requests.post(url + "/api/chat", json=payload, timeout=900, stream=True)
     response.raise_for_status()
-    return response.json()["message"]["content"]
+    for line in response.iter_lines():
+        if not line:
+            continue
+        try:
+            chunk = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        content = chunk.get("message", {}).get("content", "")
+        if content:
+            full_text += content
+            token_count += 1
+            if token_count % 50 == 0:
+                on_stream(token_count)
+    return full_text
 
 
 DEFAULT_BATCH_SIZE = 5
 
 
-def _call_llm(prompt, data_json, config):
+def _call_llm(prompt, data_json, config, on_stream=None):
     """Dispatch to the configured LLM provider."""
     provider = config.get("provider", "anthropic")
     if provider == "anthropic":
@@ -153,15 +176,17 @@ def _call_llm(prompt, data_json, config):
     elif provider == "openai":
         return _call_openai(prompt, data_json, config)
     elif provider == "ollama":
-        return _call_ollama(prompt, data_json, config)
+        return _call_ollama(prompt, data_json, config, on_stream=on_stream)
     raise ValueError("Unknown provider: {}".format(provider))
 
 
 def _split_github_data(gh_data, batch_size):
     """Split github_data into chunks, each containing a subset of repositories.
 
-    Each chunk keeps the full profile / stats / activity context but only a
-    slice of the repos list and their matching top_repo_details entries.
+    Batch 1 gets the full context (profile, stats, activity, contribution
+    calendar).  Batches 2+ get only the repos and their details to reduce
+    token usage — the LLM only needs repo data for those batches since the
+    first batch already produced the profile/activity/summary sections.
     Returns a list of (chunk_dict, repo_names_in_chunk) tuples.
     """
     repos = gh_data.get("repositories", [])
@@ -174,11 +199,20 @@ def _split_github_data(gh_data, batch_size):
     for i in range(0, len(original_repos), batch_size):
         batch_repos = original_repos[i : i + batch_size]
         batch_names = [r.get("name", "") for r in batch_repos]
-        chunk = dict(gh_data)
-        chunk["repositories"] = batch_repos
-        chunk["top_repo_details"] = {
-            k: v for k, v in details.items() if k in batch_names
-        }
+        batch_details = {k: v for k, v in details.items() if k in batch_names}
+
+        if i == 0:
+            chunk = dict(gh_data)
+            chunk["repositories"] = batch_repos
+            chunk["top_repo_details"] = batch_details
+        else:
+            chunk = {
+                "username": gh_data.get("username", ""),
+                "repositories": batch_repos,
+                "top_repo_details": batch_details,
+                "_batch_note": "This is a continuation batch. Only review the repositories listed here. Do NOT produce profile_review, activity_review, code_review, repo_presentation, categories, or summary — only repository_reviews.",
+            }
+
         chunks.append((chunk, batch_names))
     return chunks
 
@@ -200,11 +234,62 @@ def _merge_reviews(base, additions):
     return base
 
 
+MAX_RETRIES = 2
+
+
+def _call_llm_with_retry(prompt, data_json, config, retries=MAX_RETRIES,
+                         on_progress=None, on_stream=None):
+    """Call the LLM and parse JSON, retrying on transient/parse failures."""
+    last_error = None
+    for attempt in range(1, retries + 1):
+        try:
+            raw = _call_llm(prompt, data_json, config, on_stream=on_stream)
+            return _extract_json(raw)
+        except Exception as e:
+            last_error = e
+            snippet = ""
+            if isinstance(e, ValueError) and "raw" in dir():
+                snippet = (raw or "")[:200].replace("\n", " ")
+            if on_progress:
+                if attempt < retries:
+                    on_progress(
+                        "LLM response not valid JSON (attempt {}/{}). Retrying...{}".format(
+                            attempt, retries,
+                            " Response preview: " + snippet if snippet else ""
+                        )
+                    )
+                else:
+                    on_progress(
+                        "LLM response not valid JSON after {} attempts. Error: {}{}".format(
+                            retries, str(e)[:100],
+                            " | Response preview: " + snippet if snippet else ""
+                        )
+                    )
+            if attempt < retries:
+                continue
+    raise last_error
+
+
+def _run_batch(idx, chunk, names, prompt, config, on_progress=None):
+    """Execute a single batch call with retries. Returns (idx, review, error)."""
+    batch_label = "batch {}".format(idx + 1)
+    try:
+        data_json = json.dumps(chunk, default=str)
+        review = _call_llm_with_retry(prompt, data_json, config, on_progress=on_progress)
+        return (idx, review, None)
+    except Exception as e:
+        return (idx, None, str(e))
+
+
 def generate_review(github_data_path, config, on_progress=None):
     """Send GitHub data to an LLM for analysis and return the parsed review.
 
     When there are more repos than BATCH_SIZE, the data is split into batches
-    and each batch is sent to the LLM separately, then the results are merged.
+    and sent to the LLM in parallel using a thread pool, then merged.
+    Batch 1 gets full context; batches 2+ get only repo data (reduced tokens).
+    If a batch fails after retries, it is skipped and the rest still merge.
+
+    For Ollama, streaming is enabled to report token progress.
 
     Args:
         github_data_path: Path to github_data.json
@@ -227,38 +312,106 @@ def generate_review(github_data_path, config, on_progress=None):
     batch_size = max(2, min(batch_size, 20))
     chunks = _split_github_data(gh_data, batch_size)
 
+    is_ollama = config.get("provider") == "ollama"
+
+    def make_stream_cb(label):
+        if not is_ollama or not on_progress:
+            return None
+        def cb(tokens):
+            on_progress("{}: {} tokens generated...".format(label, tokens))
+        return cb
+
+    # Single batch — no parallelism needed
     if len(chunks) == 1:
         data_json = json.dumps(gh_data, default=str)
-        raw = _call_llm(prompt, data_json, config)
-        review = _extract_json(raw)
+        stream_cb = make_stream_cb("Generating")
+        review = _call_llm_with_retry(prompt, data_json, config,
+                                      on_progress=on_progress,
+                                      on_stream=stream_cb)
         _validate_review(review)
         return review
 
     if on_progress:
-        on_progress("Splitting {} repos into {} batches of ~{}...".format(
+        on_progress("Splitting {} repos into {} batches of ~{} (parallel)...".format(
             original_count, len(chunks), batch_size
         ))
 
-    base_review = None
-    batch_reviews = []
+    # Send batch 1 first (needs full context for profile/summary sections)
+    first_chunk, first_names = chunks[0]
+    if on_progress:
+        on_progress("Sending batch 1/{} ({} repos, full context)...".format(
+            len(chunks), len(first_names)
+        ))
+    first_result = _run_batch(
+        0, first_chunk, first_names, prompt, config, on_progress=on_progress
+    )
 
-    for idx, (chunk, names) in enumerate(chunks):
+    # Send remaining batches in parallel (stripped context)
+    results = [first_result]
+    remaining = chunks[1:]
+    if remaining:
         if on_progress:
-            on_progress("Sending batch {}/{} ({} repos: {})...".format(
-                idx + 1, len(chunks), len(names),
-                ", ".join(names[:3]) + ("..." if len(names) > 3 else "")
+            on_progress("Sending batches 2-{}/{} in parallel ({} repos, stripped context)...".format(
+                len(chunks), len(chunks),
+                sum(len(n) for _, n in remaining)
             ))
 
-        data_json = json.dumps(chunk, default=str)
-        raw = _call_llm(prompt, data_json, config)
-        review = _extract_json(raw)
+        max_workers = min(len(remaining), 4)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {}
+            for i, (chunk, names) in enumerate(remaining, start=1):
+                future = executor.submit(
+                    _run_batch, i, chunk, names, prompt, config, on_progress=on_progress
+                )
+                futures[future] = (i, names)
 
-        if idx == 0:
+            for future in as_completed(futures):
+                batch_idx, names = futures[future]
+                idx, review, error = future.result()
+                results.append((idx, review, error))
+                if on_progress:
+                    if error:
+                        on_progress("Batch {}/{} failed: {}".format(
+                            batch_idx + 1, len(chunks), error[:80]
+                        ))
+                    else:
+                        on_progress("Batch {}/{} complete.".format(
+                            batch_idx + 1, len(chunks)
+                        ))
+
+    results.sort(key=lambda r: r[0])
+
+    base_review = None
+    batch_reviews = []
+    failed_batches = []
+
+    for idx, review, error in results:
+        chunk_names = chunks[idx][1]
+        if error:
+            failed_batches.append((idx + 1, chunk_names, error))
+        elif base_review is None:
             base_review = review
         else:
             batch_reviews.append(review)
 
+    if base_review is None:
+        if failed_batches:
+            errors = "; ".join("batch {}: {}".format(b, err) for b, _, err in failed_batches)
+            raise ValueError("All LLM batches failed: {}".format(errors))
+        raise ValueError("No batches were processed")
+
     merged = _merge_reviews(base_review, batch_reviews)
+
+    if failed_batches:
+        skipped = []
+        for _, names, _ in failed_batches:
+            skipped.extend(names)
+        merged.setdefault("_skipped_repos", skipped)
+        if on_progress:
+            on_progress("{}/{} batches succeeded. {} repos skipped due to errors.".format(
+                len(chunks) - len(failed_batches), len(chunks), len(skipped)
+            ))
+
     _validate_review(merged)
     return merged
 

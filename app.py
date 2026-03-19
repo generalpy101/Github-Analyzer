@@ -198,6 +198,13 @@ def api_generate(username):
     config = load_config()
     use_cache = request.args.get("use_cache") == "1"
 
+    config["_repo_filters"] = {
+        "include_public": request.args.get("include_public") == "1",
+        "include_private": request.args.get("include_private") == "1",
+        "include_forked": request.args.get("include_forked") == "1",
+        "include_archived": request.args.get("include_archived") == "1",
+    }
+
     # Check if AI is configured; if not, flag it so pipeline skips LLM
     ai_configured = True
     if config["provider"] != "ollama" and not config.get("api_key"):
@@ -272,6 +279,37 @@ def api_delete_run(run_id):
     return jsonify({"deleted": True})
 
 
+@app.route("/api/reanalyze/<int:run_id>", methods=["POST"])
+def api_reanalyze(run_id):
+    """Re-run AI analysis on an existing algorithmic review using cached data."""
+    run = get_run(run_id)
+    if not run:
+        return jsonify({"error": "Run not found"}), 404
+    if not run.get("github_data_json"):
+        return jsonify({"error": "No cached GitHub data for this run"}), 400
+
+    username = run["username"]
+    config = load_config()
+
+    ai_configured = True
+    if config["provider"] != "ollama" and not config.get("api_key"):
+        ai_configured = False
+    if not ai_configured:
+        return jsonify({"error": "AI is not configured. Go to Settings first."}), 400
+
+    config["_ai_configured"] = True
+    config["_repo_filters"] = {}
+    config["_reanalyze_data"] = run["github_data_json"]
+
+    cleanup_old_jobs()
+    new_run_id, error = start_generation(username, True, config, BASE_DIR, TEMPLATES_DIR)
+
+    if error == "already_running":
+        return jsonify({"run_id": new_run_id, "conflict": True})
+
+    return jsonify({"run_id": new_run_id, "username": username})
+
+
 @app.route("/api/history")
 def api_history():
     return jsonify(get_history())
@@ -302,7 +340,7 @@ def serve_report(run_id):
     nav_repos = "/report/{}/repos.html".format(run_id)
     return render_overview(review, TEMPLATES_DIR, back_url="/",
                            nav_overview_url=nav_overview, nav_repos_url=nav_repos,
-                           github_data=github_data)
+                           github_data=github_data, run_id=run_id)
 
 
 @app.route("/report/<int:run_id>/repos.html")

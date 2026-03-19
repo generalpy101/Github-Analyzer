@@ -15,8 +15,29 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from html import escape
+
+
+def md_inline(text):
+    """Convert inline markdown to HTML while escaping dangerous content.
+
+    Supports: **bold**, *italic*, `code`, and [text](url) links.
+    Everything else is HTML-escaped first so no raw HTML injection is possible.
+    """
+    if not text:
+        return ""
+    text = escape(text)
+    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', text)
+    text = re.sub(r'`([^`]+?)`', r'<code class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">\1</code>', text)
+    text = re.sub(
+        r'\[([^\]]+)\]\((https?://[^\)]+)\)',
+        r'<a href="\2" target="_blank" class="text-blue-600 hover:underline">\1</a>',
+        text,
+    )
+    return text
 
 
 # ---------------------------------------------------------------------------
@@ -75,7 +96,7 @@ def list_items(items, icon="check", color="emerald"):
     html = '<ul class="space-y-2">'
     for item in items:
         html += '<li class="flex items-start gap-2">{svg}<span class="text-sm text-gray-600 dark:text-gray-300">{text}</span></li>'.format(
-            svg=svg, text=escape(item)
+            svg=svg, text=md_inline(item)
         )
     html += "</ul>"
     return html
@@ -253,7 +274,7 @@ def build_highlights(highlights):
             </div>
         </div>""".format(
             name=escape(proj.get("repo_name", "")),
-            desc=escape(proj.get("description", "")),
+            desc=md_inline(proj.get("description", "")),
             badge=complexity_badge(proj.get("technical_complexity", "medium")),
             langs=langs,
             strengths=list_items(proj.get("strengths", []), "check", "emerald"),
@@ -279,7 +300,7 @@ def build_categories(categories):
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{desc}</p>
             <div class="flex flex-wrap gap-1.5">{tags}</div>
-        </div>""".format(c=c, name=escape(cat.get("name", "")), desc=escape(cat.get("description", "")), tags=repos_tags)
+        </div>""".format(c=c, name=escape(cat.get("name", "")), desc=md_inline(cat.get("description", "")), tags=repos_tags)
     return html
 
 
@@ -295,8 +316,8 @@ def build_recommendations(recommendations):
             </div>
         </div>""".format(
             badge=priority_badge(rec.get("priority", "medium")),
-            title=escape(rec.get("title", "")),
-            desc=escape(rec.get("description", "")),
+            title=md_inline(rec.get("title", "")),
+            desc=md_inline(rec.get("description", "")),
         )
     return html
 
@@ -306,7 +327,7 @@ def build_summary(summary):
     for para in summary.split("\n\n"):
         para = para.strip()
         if para:
-            html += '<p class="text-gray-200 leading-relaxed">{}</p>'.format(escape(para))
+            html += '<p class="text-gray-200 leading-relaxed">{}</p>'.format(md_inline(para))
     return html
 
 
@@ -317,7 +338,7 @@ def build_summary(summary):
 def build_repo_card(repo):
     name = escape(repo.get("repo_name", ""))
     url = escape(repo.get("url", ""))
-    desc = escape(repo.get("description", "No description"))
+    desc = md_inline(repo.get("description", "No description"))
     score = repo.get("score", 0)
     lang = escape(repo.get("primary_language", "") or "")
     is_private = repo.get("is_private", False)
@@ -325,8 +346,8 @@ def build_repo_card(repo):
     stars = repo.get("stars", 0)
     forks = repo.get("forks", 0)
     open_issues = repo.get("open_issues", 0)
-    commit_quality = escape(repo.get("commit_quality", ""))
-    verdict = escape(repo.get("verdict", ""))
+    commit_quality = md_inline(repo.get("commit_quality", ""))
+    verdict = md_inline(repo.get("verdict", ""))
     rec = repo.get("recommendation", "keep")
     complexity = repo.get("technical_complexity", "medium")
     category = escape(repo.get("category", ""))
@@ -376,7 +397,7 @@ def build_repo_card(repo):
             '</div>'
         )
 
-    pr_activity = escape(repo.get("pr_activity", ""))
+    pr_activity = md_inline(repo.get("pr_activity", ""))
     pr_section = ""
     if pr_activity:
         pr_section = (
@@ -766,7 +787,7 @@ def render_repo_detail(review, repo_name, github_data, templates_dir,
 
     score = repo_review.get("score", 0)
     url = escape(repo_review.get("url", ""))
-    desc = escape(repo_review.get("description", ""))
+    desc = md_inline(repo_review.get("description", ""))
     rec = repo_review.get("recommendation", "keep")
     complexity = repo_review.get("technical_complexity", "medium")
     category = escape(repo_review.get("category", ""))
@@ -793,12 +814,12 @@ def render_repo_detail(review, repo_name, github_data, templates_dir,
         "infra_score_ring": ring_svg(infra_score, 60, 5),
         "pr_stats_html": build_pr_stats_section(pr_st, issue_st),
         "commit_table": build_commit_table(commits),
-        "commit_quality": escape(repo_review.get("commit_quality", "")),
-        "pr_activity": escape(repo_review.get("pr_activity", "")),
+        "commit_quality": md_inline(repo_review.get("commit_quality", "")),
+        "pr_activity": md_inline(repo_review.get("pr_activity", "")),
         "observations": list_items(repo_review.get("code_observations", []), "check", "blue"),
         "strengths": list_items(repo_review.get("strengths", []), "check", "emerald"),
         "improvements": list_items(repo_review.get("improvements", []), "arrow", "amber"),
-        "verdict": escape(repo_review.get("verdict", "")),
+        "verdict": md_inline(repo_review.get("verdict", "")),
         "ai_indicator": v["ai_indicator"],
     }
 
@@ -899,7 +920,7 @@ ALGO_BADGE = (
 )
 
 
-def build_fallback_banner(review):
+def build_fallback_banner(review, run_id=None):
     """Render a banner explaining why algorithmic scoring was used instead of AI."""
     if review.get("is_ai_generated", False):
         return ""
@@ -919,6 +940,32 @@ def build_fallback_banner(review):
             '</details>'
         ).format(detail=escape(detail))
 
+    reanalyze_html = ""
+    if run_id:
+        reanalyze_html = (
+            '<button onclick="reanalyzeRun({run_id})" id="reanalyze-btn" '
+            'class="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg text-xs font-medium '
+            'hover:bg-amber-500 transition-colors inline-flex items-center gap-1.5">'
+            '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">'
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" '
+            'd="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 '
+            '8.003 0 01-15.357-2m15.357 2H15"/></svg>'
+            'Re-analyze with AI</button>'
+            '<script>'
+            'function reanalyzeRun(runId) {{'
+            '  var btn = document.getElementById("reanalyze-btn");'
+            '  btn.disabled = true; btn.textContent = "Starting...";'
+            '  fetch("/api/reanalyze/" + runId, {{method: "POST"}})'
+            '    .then(function(r) {{ return r.json(); }})'
+            '    .then(function(data) {{'
+            '      if (data.error) {{ btn.textContent = data.error; return; }}'
+            '      window.location.href = "/";'
+            '    }})'
+            '    .catch(function(e) {{ btn.textContent = "Error: " + e.message; }});'
+            '}}'
+            '</script>'
+        ).format(run_id=run_id)
+
     return (
         '<div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl">'
         '<div class="flex items-start gap-3">'
@@ -931,10 +978,11 @@ def build_fallback_banner(review):
         'Scores are computed from repository metadata (stars, languages, README presence, etc.) '
         'rather than AI-powered analysis. Results may be less nuanced.</p>'
         '{detail_html}'
+        '{reanalyze_html}'
         '</div>'
         '</div>'
         '</div>'
-    ).format(reason=escape(reason), detail_html=detail_html)
+    ).format(reason=escape(reason), detail_html=detail_html, reanalyze_html=reanalyze_html)
 
 
 def _common_vars(review):
@@ -970,7 +1018,7 @@ def _common_vars(review):
     }
 
 
-def _build_overview_html(review, templates_dir, github_data=None):
+def _build_overview_html(review, templates_dir, github_data=None, run_id=None):
     """Build overview page HTML content (without base wrapper)."""
     v = _common_vars(review)
     pr, cr, rp, ar = v["pr"], v["cr"], v["rp"], v["ar"]
@@ -992,7 +1040,7 @@ def _build_overview_html(review, templates_dir, github_data=None):
         profile_readme_section = (
             '<div class="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">'
             '<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Profile README Review</h3>'
-            '<p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">' + escape(readme_text) + '</p>'
+            '<p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">' + md_inline(readme_text) + '</p>'
             '</div>'
         )
 
@@ -1003,7 +1051,7 @@ def _build_overview_html(review, templates_dir, github_data=None):
         "username": v["username"],
         "headline": v["headline"],
         "ai_indicator": v["ai_indicator"],
-        "fallback_banner": build_fallback_banner(review),
+        "fallback_banner": build_fallback_banner(review, run_id=run_id),
         "lang_tags": lang_tags,
         "summary_html": build_summary(review.get("summary", "")),
         "score_cards": build_score_cards(pr, cr, rp, ar),
@@ -1019,8 +1067,8 @@ def _build_overview_html(review, templates_dir, github_data=None):
         "code_observations": list_items(cr.get("code_quality_observations", []), "check", "blue"),
         "code_strengths": list_items(cr.get("strengths", []), "check", "emerald"),
         "code_improvements": list_items(cr.get("improvements", []), "arrow", "amber"),
-        "activity_pattern": escape(ar.get("activity_pattern", "")),
-        "recent_focus": escape(ar.get("recent_focus", "")),
+        "activity_pattern": md_inline(ar.get("activity_pattern", "")),
+        "recent_focus": md_inline(ar.get("recent_focus", "")),
         "account_age": "{:.1f}".format(ar.get("account_age_years", 0)),
         "activity_strengths": list_items(ar.get("strengths", []), "check", "emerald"),
         "activity_improvements": list_items(ar.get("improvements", []), "arrow", "amber"),
@@ -1082,9 +1130,9 @@ REPOS_EXTRA_CSS = """
 
 def render_overview(review, templates_dir, back_url="/",
                     nav_overview_url="index.html", nav_repos_url="repos.html",
-                    github_data=None):
+                    github_data=None, run_id=None):
     """Render the overview page and return the full HTML string."""
-    content, v = _build_overview_html(review, templates_dir, github_data=github_data)
+    content, v = _build_overview_html(review, templates_dir, github_data=github_data, run_id=run_id)
     return _wrap_base(content, v, templates_dir, page="overview", back_url=back_url,
                       nav_overview_url=nav_overview_url, nav_repos_url=nav_repos_url)
 

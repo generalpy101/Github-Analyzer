@@ -187,9 +187,17 @@ def fetch_repo_details(username: str, repo_name: str) -> dict:
     else:
         details["recent_commits"] = []
 
-    # Check README existence
+    # Fetch README content (not just existence)
     readme = run_gh(["api", f"repos/{username}/{repo_name}/readme"], ignore_errors=True)
     details["has_readme"] = readme is not None and isinstance(readme, dict)
+    details["readme_content"] = ""
+    if details["has_readme"] and isinstance(readme, dict) and "content" in readme:
+        import base64
+        try:
+            raw = base64.b64decode(readme["content"]).decode("utf-8", errors="replace")
+            details["readme_content"] = raw[:3000]
+        except Exception:
+            pass
 
     # Full repo info (topics, homepage, etc.)
     full = run_gh(["api", f"repos/{username}/{repo_name}"], ignore_errors=True)
@@ -295,9 +303,13 @@ def fetch_recent_commits(username: str) -> list:
     return commits
 
 
-def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_count=15, on_progress=None):
+def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_count=15,
+              on_progress=None):
     """
     Fetch all GitHub data for a user and write to output_path.
+
+    The cache file always contains ALL repos. Filtering by type (public,
+    private, forked, archived) is applied later via apply_repo_filters().
 
     Args:
         username: GitHub username
@@ -306,7 +318,7 @@ def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_c
         on_progress: Optional callback(message) for progress updates
 
     Returns:
-        The output dict
+        The output dict (unfiltered)
     """
     def progress(msg):
         print(msg)
@@ -321,16 +333,13 @@ def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_c
         raise RuntimeError("Could not fetch profile. Is `gh` authenticated?")
 
     # 2. All repos
-    repos = fetch_repos(username)
-    progress("Found {} repositories".format(len(repos)))
+    all_repos = fetch_repos(username)
+    progress("Found {} repositories".format(len(all_repos)))
 
-    # 3. Sort repos: non-fork, non-archived, by most recently pushed
-    interesting_repos = [
-        r for r in repos
-        if not r.get("isFork", False) and not r.get("isArchived", False) and not r.get("isEmpty", False)
-    ]
-    interesting_repos.sort(key=lambda r: r.get("pushedAt", ""), reverse=True)
-    top_repos = interesting_repos[:top_repos_count]
+    # 3. Select repos for detailed analysis (non-empty, sorted by push date)
+    candidate_repos = [r for r in all_repos if not r.get("isEmpty", False)]
+    candidate_repos.sort(key=lambda r: r.get("pushedAt", ""), reverse=True)
+    top_repos = candidate_repos[:top_repos_count]
 
     # 4. Fetch details for top repos
     repo_details = {}
@@ -351,18 +360,18 @@ def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_c
     # 7. Profile README
     profile_readme = fetch_profile_readme(username)
 
-    # 8. Compute summary stats
+    # 8. Compute summary stats from all repos (cache stores full picture)
     all_languages = {}
-    for repo in repos:
+    for repo in all_repos:
         pl = repo.get("primaryLanguage")
         lang = pl.get("name") if isinstance(pl, dict) else pl
         if lang:
             all_languages[lang] = all_languages.get(lang, 0) + 1
 
-    total_stars = sum(r.get("stargazerCount", 0) for r in repos)
-    total_forks = sum(r.get("forkCount", 0) for r in repos)
-    fork_repos = [r for r in repos if r.get("isFork", False)]
-    private_repos = [r for r in repos if r.get("isPrivate", False)]
+    total_stars = sum(r.get("stargazerCount", 0) for r in all_repos)
+    total_forks = sum(r.get("forkCount", 0) for r in all_repos)
+    fork_repos = [r for r in all_repos if r.get("isFork", False)]
+    private_repos = [r for r in all_repos if r.get("isPrivate", False)]
 
     # Build output
     output = {
@@ -388,11 +397,11 @@ def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_c
         },
         "profile_readme": profile_readme,
         "summary_stats": {
-            "total_repos": len(repos),
-            "public_repos": len(repos) - len(private_repos),
+            "total_repos": len(all_repos),
+            "public_repos": len(all_repos) - len(private_repos),
             "private_repos": len(private_repos),
             "forked_repos": len(fork_repos),
-            "original_repos": len(repos) - len(fork_repos),
+            "original_repos": len(all_repos) - len(fork_repos),
             "total_stars": total_stars,
             "total_forks": total_forks,
             "languages": all_languages,
@@ -400,7 +409,7 @@ def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_c
                 profile.get("created_at", "2020-01-01T00:00:00Z").replace("Z", "+00:00")
             ).replace(tzinfo=None)).days,
         },
-        "repositories": repos,
+        "repositories": all_repos,
         "top_repo_details": repo_details,
         "recent_activity": activity,
         "recent_commits": recent_commits,
@@ -413,6 +422,78 @@ def fetch_all(username, output_path="runtime/data/github_data.json", top_repos_c
 
     progress("Data written to {}".format(output_path))
     return output
+
+
+def apply_repo_filters(gh_data, repo_filters):
+    """Apply repo filters to already-loaded github_data, returning a filtered copy.
+
+    Used when serving from cache so that the user's checkbox selection still
+    takes effect even though fetch_all() was not called.
+    """
+    if not repo_filters:
+        return gh_data
+
+    f = repo_filters
+    inc_public = bool(f.get("include_public", False))
+    inc_private = bool(f.get("include_private", False))
+    inc_forked = bool(f.get("include_forked", False))
+    inc_archived = bool(f.get("include_archived", False))
+
+    if not (inc_public or inc_private or inc_forked or inc_archived):
+        return gh_data
+
+    repos = gh_data.get("repositories", [])
+    filtered = []
+    for r in repos:
+        if r.get("isEmpty", False):
+            continue
+        is_private = r.get("isPrivate", False)
+        is_fork = r.get("isFork", False)
+        is_archived = r.get("isArchived", False)
+
+        included = False
+        if is_archived and inc_archived:
+            included = True
+        if is_fork and not is_archived and inc_forked:
+            included = True
+        if is_private and not is_fork and not is_archived and inc_private:
+            included = True
+        if not is_private and not is_fork and not is_archived and inc_public:
+            included = True
+
+        if included:
+            filtered.append(r)
+
+    if len(filtered) == len(repos):
+        return gh_data
+
+    details = gh_data.get("top_repo_details", {})
+    filtered_names = {r.get("name", "") for r in filtered}
+    result = dict(gh_data)
+    result["repositories"] = filtered
+    result["top_repo_details"] = {k: v for k, v in details.items() if k in filtered_names}
+
+    all_languages = {}
+    for repo in filtered:
+        pl = repo.get("primaryLanguage")
+        lang = pl.get("name") if isinstance(pl, dict) else pl
+        if lang:
+            all_languages[lang] = all_languages.get(lang, 0) + 1
+
+    stats = dict(gh_data.get("summary_stats", {}))
+    fork_count = sum(1 for r in filtered if r.get("isFork", False))
+    private_count = sum(1 for r in filtered if r.get("isPrivate", False))
+    stats["total_repos"] = len(filtered)
+    stats["public_repos"] = len(filtered) - private_count
+    stats["private_repos"] = private_count
+    stats["forked_repos"] = fork_count
+    stats["original_repos"] = len(filtered) - fork_count
+    stats["total_stars"] = sum(r.get("stargazerCount", 0) for r in filtered)
+    stats["total_forks"] = sum(r.get("forkCount", 0) for r in filtered)
+    stats["languages"] = all_languages
+    result["summary_stats"] = stats
+
+    return result
 
 
 def main():

@@ -145,8 +145,19 @@ github-review/
 │   ├── db/github_review.db     #   SQLite database
 │   ├── data/<username>/        #   Fetched GitHub data per user
 │   └── output/<username>/      #   Generated HTML reports
+├── tests/                      # pytest test suite
+│   ├── test_app_routes.py      #   Flask route integration tests
+│   ├── test_config.py          #   Config load/save/redact tests
+│   ├── test_db.py              #   Database CRUD tests
+│   ├── test_fallback_review.py #   Algorithmic scoring tests
+│   ├── test_fetch_filters.py   #   Repo filter logic tests
+│   ├── test_generate_report.py #   Report rendering tests
+│   └── test_llm_client.py      #   JSON extraction, batching, retry tests
+├── .github/workflows/test.yml  # CI: runs pytest on push
+├── Dockerfile                  # Backend container for local dev
+├── pytest.ini                  # Test configuration
 ├── requirements.txt            # Python dependencies
-├── requirements-dev.txt        # Dev/build dependencies
+├── requirements-dev.txt        # Dev/build dependencies (pytest, pyinstaller)
 ├── package.json                # npm scripts for Tauri
 └── .gitignore
 ```
@@ -165,6 +176,54 @@ Settings are stored in `runtime/config/config.json` and editable through the Set
 | `ollama_url` | `http://localhost:11434` | Ollama server URL |
 | `top_repos` | `15` | Number of repos to fetch detailed data for (5-30) |
 | `extended_thinking` | `false` | Enable extended reasoning for deeper analysis |
+
+---
+
+## Development
+
+### Running tests
+
+```bash
+# Install dev dependencies
+pip install -r requirements-dev.txt
+
+# Run the full test suite
+pytest
+
+# Run with coverage
+pytest --cov=server --cov-report=term-missing
+```
+
+The test suite covers:
+- **Config** — load/save/merge/redact logic
+- **Database** — CRUD operations, history, stale run cleanup
+- **Report generation** — markdown rendering, score helpers, language bars, infra grids, PR stats, fallback banners
+- **LLM client** — JSON extraction, batching, merging, retry logic
+- **Repo filters** — public/private/forked/archived filtering and stats recalculation
+- **App routes** — page rendering, API endpoints, error handling
+
+Tests run automatically on every push via GitHub Actions.
+
+### Docker
+
+Run the backend in a container (no Python/Node/Rust setup needed):
+
+```bash
+# Build
+docker build -t github-review .
+
+# Run (mount runtime dir for persistence)
+docker run -p 5959:5959 -v $(pwd)/runtime:/app/runtime github-review
+```
+
+Open [http://localhost:5959](http://localhost:5959). You'll need to authenticate `gh` inside the container or mount your host credentials:
+
+```bash
+docker run -p 5959:5959 \
+  -v $(pwd)/runtime:/app/runtime \
+  -v ~/.config/gh:/root/.config/gh:ro \
+  github-review
+```
 
 ---
 
@@ -249,6 +308,35 @@ All endpoints are served by the Flask backend on `http://localhost:5959`.
 ```
 
 If the LLM is unavailable, the pipeline falls back to algorithmic scoring computed from repo metadata (stars, languages, README presence, commit history, infrastructure signals).
+
+---
+
+## Contributing
+
+### Conventional commits
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/). Use these prefixes for commit messages:
+
+| Prefix | Use for |
+|---|---|
+| `feat:` | New features |
+| `fix:` | Bug fixes |
+| `refactor:` | Code restructuring without behavior change |
+| `docs:` | Documentation changes |
+| `test:` | Adding or updating tests |
+| `chore:` | Build scripts, dependencies, config |
+| `style:` | Formatting, whitespace (no logic change) |
+
+Examples:
+```
+feat: add batch size slider to settings page
+fix: repo filters not applied when using cached data
+refactor: move LLM callers to use _call_llm dispatcher
+test: add pytest suite for fallback review scoring
+docs: update README with Docker and testing sections
+```
+
+Write descriptive commit bodies when the change is non-trivial.
 
 ---
 

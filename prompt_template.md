@@ -152,6 +152,7 @@ Output ONLY valid JSON matching this exact schema:
    - `issue_stats`: total_issues, close_rate
    - `recent_commits`: examine actual commit messages for quality
    - `languages`: look at the byte distribution, not just the primary language
+   - `readme_content`: when provided, evaluate the README for completeness (install instructions, usage examples, screenshots, API docs), writing quality, and whether it's a template or custom-written
 4. **`infrastructure_score`** = weighted sum: tests (35pts) + CI/CD (35pts) + Docker (15pts) + docs (15pts). Adjust based on context (a tiny script doesn't need Docker)
 5. **Score calibration**: 0-30 = needs major work, 30-50 = below average, 50-70 = solid, 70-85 = strong, 85-100 = exceptional. Most repos should fall in 30-70 range.
 6. **`recommendation`**: "showcase" = impressive enough to pin. "improve" = has potential, worth investing time. "keep" = fine as-is, no action needed. "archive" = adds noise, should be hidden.

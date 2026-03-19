@@ -17,7 +17,7 @@ from datetime import datetime
 from server.config import load_config
 from server.db import create_run, update_run
 from server.fallback_review import compute_fallback_review
-from server.fetch_github_data import fetch_all
+from server.fetch_github_data import fetch_all, apply_repo_filters
 from server.generate_report import render_overview, render_repos, generate
 from server.llm_client import generate_review, test_connection
 
@@ -193,7 +193,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
                 _emit(run_id, "log", {"message": msg})
 
             _emit(run_id, "log", {"message": "Starting GitHub data fetch for @{}...".format(username)})
-            fetch_all(username, data_path, config.get("top_repos", 15), on_progress=on_fetch_progress)
+            fetch_all(username, data_path, config.get("top_repos", 15),
+                      on_progress=on_fetch_progress)
             _emit(run_id, "log", {"message": "GitHub data fetch complete."})
 
         if _is_cancelled(run_id):
@@ -202,9 +203,14 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
 
         with open(data_path) as f:
             gh_data = json.load(f)
+
+        repo_filters = config.get("_repo_filters", {})
+        gh_data = apply_repo_filters(gh_data, repo_filters)
         repo_count = gh_data.get("summary_stats", {}).get("total_repos", 0)
 
-        # Store github data in DB
+        _emit(run_id, "log", {"message": "Analyzing {} repositories.".format(repo_count)})
+
+        # Store filtered github data in DB
         update_run(run_id, github_data_json=json.dumps(gh_data))
 
         _emit(run_id, "progress", {

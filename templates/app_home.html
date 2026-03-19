@@ -39,6 +39,27 @@
                     Generate
                 </button>
             </div>
+
+            <!-- Repo filters -->
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+                <span class="text-xs text-gray-400 font-medium">Include:</span>
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" id="filter-public" checked class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-xs text-gray-600 dark:text-gray-300">Public</span>
+                </label>
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" id="filter-private" class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-xs text-gray-600 dark:text-gray-300">Private</span>
+                </label>
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" id="filter-forked" class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-xs text-gray-600 dark:text-gray-300">Forked</span>
+                </label>
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" id="filter-archived" class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-xs text-gray-600 dark:text-gray-300">Archived</span>
+                </label>
+            </div>
         </form>
 
         <!-- Cache notice -->
@@ -156,8 +177,8 @@
                     <button onclick="stopRun({{ item.id }}, this)" title="Stop" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                     </button>
-                    {% elif item.status == 'error' %}
-                    <button onclick="deleteRun({{ item.id }}, this)" title="Remove" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                    {% else %}
+                    <button onclick="deleteRun({{ item.id }}, this)" title="Delete" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
                     {% endif %}
@@ -409,6 +430,15 @@ function deleteRun(runId, btn) {
         });
     }
 
+    function getFilterParams() {
+        var params = [];
+        if (document.getElementById('filter-public').checked) params.push('include_public=1');
+        if (document.getElementById('filter-private').checked) params.push('include_private=1');
+        if (document.getElementById('filter-forked').checked) params.push('include_forked=1');
+        if (document.getElementById('filter-archived').checked) params.push('include_archived=1');
+        return params;
+    }
+
     function startGeneration(username, useCache) {
         clearLogs();
         showGeneratingUI(username);
@@ -418,8 +448,10 @@ function deleteRun(runId, btn) {
         }
         addLog('Requesting generation for @' + username + (useCache ? ' (using cache)' : '') + '...');
 
+        var params = getFilterParams();
+        if (useCache) params.push('use_cache=1');
         var url = '/api/generate/' + encodeURIComponent(username);
-        if (useCache) url += '?use_cache=1';
+        if (params.length) url += '?' + params.join('&');
 
         fetch(url, {method: 'POST'})
             .then(function(r) { return r.json(); })
