@@ -127,7 +127,8 @@ def api_save_settings():
     data = request.get_json()
     if not data:
         return jsonify({"error": "No data"}), 400
-    allowed = {"provider", "model", "api_key", "ollama_url", "top_repos", "batch_size", "extended_thinking"}
+    allowed = {"provider", "model", "api_key", "ollama_url",
+               "top_repos", "batch_size", "extended_thinking"}
     filtered = {k: v for k, v in data.items() if k in allowed}
     save_config(filtered)
     return jsonify({"ok": True, "config": get_redacted_config()})
@@ -215,7 +216,8 @@ def api_generate(username):
 
     cleanup_old_jobs()
 
-    run_id, error = start_generation(clean, use_cache, config, BASE_DIR, TEMPLATES_DIR)
+    run_id, error = start_generation(
+        clean, use_cache, config, BASE_DIR, TEMPLATES_DIR)
 
     if error == "already_running":
         return jsonify({"run_id": run_id, "conflict": True, "username": clean})
@@ -304,7 +306,8 @@ def api_reanalyze(run_id):
     config["_reanalyze_data"] = run["github_data_json"]
 
     cleanup_old_jobs()
-    new_run_id, error = start_generation(username, True, config, BASE_DIR, TEMPLATES_DIR)
+    new_run_id, error = start_generation(
+        username, True, config, BASE_DIR, TEMPLATES_DIR)
 
     if error == "already_running":
         return jsonify({"run_id": new_run_id, "conflict": True})
@@ -351,7 +354,8 @@ def api_chat_send(run_id):
 
     user_message = data["message"].strip()
     review = json.loads(run["review_json"])
-    github_data = json.loads(run["github_data_json"]) if run.get("github_data_json") else {}
+    github_data = json.loads(run["github_data_json"]) if run.get(
+        "github_data_json") else {}
 
     add_chat_message(run_id, "user", user_message)
 
@@ -374,7 +378,8 @@ def api_chat_send(run_id):
 def _inject_detail_urls(review, run_id):
     """Add _detail_url to each repo review so cards link to the deep-dive page."""
     for r in review.get("repository_reviews", []):
-        r["_detail_url"] = "/report/{}/repo/{}".format(run_id, r.get("repo_name", ""))
+        r["_detail_url"] = "/report/{}/repo/{}".format(
+            run_id, r.get("repo_name", ""))
 
 
 @app.route("/report/<int:run_id>/")
@@ -388,7 +393,8 @@ def serve_report(run_id):
             return _report_404(run=run, message="This review is still being generated. Check back shortly.")
         return _report_404(run=run, message="This review was cancelled before it completed.")
     review = json.loads(run["review_json"])
-    github_data = json.loads(run["github_data_json"]) if run.get("github_data_json") else {}
+    github_data = json.loads(run["github_data_json"]) if run.get(
+        "github_data_json") else {}
     _inject_detail_urls(review, run_id)
     nav_overview = "/report/{}/".format(run_id)
     nav_repos = "/report/{}/repos.html".format(run_id)
@@ -425,7 +431,8 @@ def serve_repo_detail(run_id, repo_name):
     if not run.get("review_json"):
         return _report_404(run=run, message="This review has no data yet.")
     review = json.loads(run["review_json"])
-    github_data = json.loads(run["github_data_json"]) if run.get("github_data_json") else {}
+    github_data = json.loads(run["github_data_json"]) if run.get(
+        "github_data_json") else {}
 
     nav_overview = "/report/{}/".format(run_id)
     nav_repos = "/report/{}/repos.html".format(run_id)

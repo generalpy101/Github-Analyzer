@@ -119,7 +119,8 @@ class TestLanguageBar:
 class TestCommitTable:
     def test_renders_commits(self):
         commits = [
-            {"sha": "abc1234", "message": "fix bug", "author": "dev", "date": "2025-01-01T00:00:00Z"},
+            {"sha": "abc1234", "message": "fix bug",
+                "author": "dev", "date": "2025-01-01T00:00:00Z"},
         ]
         html = build_commit_table(commits)
         assert "abc1234" in html
@@ -151,7 +152,8 @@ class TestInfraGrid:
 class TestPrStats:
     def test_with_prs(self):
         html = build_pr_stats_section(
-            {"total_prs": 10, "merged_prs": 8, "open_prs": 2, "merge_rate": 80.0, "has_code_reviews": True}
+            {"total_prs": 10, "merged_prs": 8, "open_prs": 2,
+                "merge_rate": 80.0, "has_code_reviews": True}
         )
         assert "80.0%" in html
         assert "10 PRs" in html
@@ -164,7 +166,8 @@ class TestPrStats:
     def test_with_issues(self):
         html = build_pr_stats_section(
             {"total_prs": 0},
-            {"total_issues": 5, "open_issues": 2, "closed_issues": 3, "close_rate": 60.0},
+            {"total_issues": 5, "open_issues": 2,
+                "closed_issues": 3, "close_rate": 60.0},
         )
         assert "5 issues" in html
         assert "60.0%" in html

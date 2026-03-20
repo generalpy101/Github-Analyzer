@@ -73,7 +73,8 @@ def start_generation(username, use_cache, config, base_dir, templates_dir):
 
     # Lock acquired — we own it now
     try:
-        run_id = create_run(username, config.get("provider"), config.get("model"))
+        run_id = create_run(username, config.get(
+            "provider"), config.get("model"))
 
         with _jobs_lock:
             _jobs[run_id] = {
@@ -90,7 +91,8 @@ def start_generation(username, use_cache, config, base_dir, templates_dir):
 
         t = threading.Thread(
             target=_run_pipeline,
-            args=(run_id, username, use_cache, config, base_dir, templates_dir),
+            args=(run_id, username, use_cache,
+                  config, base_dir, templates_dir),
             daemon=True,
         )
         t.start()
@@ -170,7 +172,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
         data_dir = os.path.join(base_dir, "runtime", "data", username)
         os.makedirs(data_dir, exist_ok=True)
         data_path = os.path.join(data_dir, "github_data.json")
-        legacy_data_path = os.path.join(base_dir, "data", username, "github_data.json")
+        legacy_data_path = os.path.join(
+            base_dir, "data", username, "github_data.json")
 
         # Keep old cache files usable after directory restructure.
         if not os.path.isfile(data_path) and os.path.isfile(legacy_data_path):
@@ -185,7 +188,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
                 "step": 1, "total": 4,
                 "message": "Using cached GitHub data for @{}...".format(username),
             })
-            _emit(run_id, "log", {"message": "Using cached data from {}".format(data_path)})
+            _emit(run_id, "log", {
+                  "message": "Using cached data from {}".format(data_path)})
         else:
             _emit(run_id, "progress", {
                 "step": 1, "total": 4,
@@ -196,10 +200,13 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
                 _emit(run_id, "log", {"message": msg})
 
             deep_review = config.get("_deep_review", False)
-            top_repos_count = 200 if deep_review else config.get("top_repos", 15)
+            top_repos_count = 200 if deep_review else config.get(
+                "top_repos", 15)
             if deep_review:
-                _emit(run_id, "log", {"message": "Deep review mode: fetching details for ALL repos."})
-            _emit(run_id, "log", {"message": "Starting GitHub data fetch for @{}...".format(username)})
+                _emit(run_id, "log", {
+                      "message": "Deep review mode: fetching details for ALL repos."})
+            _emit(run_id, "log", {
+                  "message": "Starting GitHub data fetch for @{}...".format(username)})
             fetch_all(username, data_path, top_repos_count,
                       on_progress=on_fetch_progress)
             _emit(run_id, "log", {"message": "GitHub data fetch complete."})
@@ -239,7 +246,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
                     existing_details[name] = fetch_repo_details(username, name)
                 gh_data["top_repo_details"] = existing_details
 
-        _emit(run_id, "log", {"message": "Analyzing {} repositories.".format(repo_count)})
+        _emit(run_id, "log", {
+              "message": "Analyzing {} repositories.".format(repo_count)})
 
         # Store filtered github data in DB
         update_run(run_id, github_data_json=json.dumps(gh_data))
@@ -247,7 +255,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
         _emit(run_id, "progress", {
             "step": 2, "total": 4,
             "message": "Fetched {} repositories. Sending to {} ({})...".format(
-                repo_count, config["provider"].title(), config.get("model", "default")
+                repo_count, config["provider"].title(
+                ), config.get("model", "default")
             ),
         })
 
@@ -266,7 +275,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
         if not config.get("_ai_configured", True):
             skip_llm = True
             llm_error = "No API key configured. Go to Settings to set up your LLM provider."
-            _emit(run_id, "log", {"message": "AI is not configured. Skipping LLM analysis."})
+            _emit(run_id, "log", {
+                  "message": "AI is not configured. Skipping LLM analysis."})
             _emit(run_id, "progress", {
                 "step": 2, "total": 4,
                 "message": "AI not configured. Using algorithmic analysis...",
@@ -274,7 +284,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
             })
         else:
             # Test connection before sending data
-            _emit(run_id, "log", {"message": "Testing {} connection...".format(config["provider"].title())})
+            _emit(run_id, "log", {"message": "Testing {} connection...".format(
+                config["provider"].title())})
             try:
                 conn_ok, conn_msg = test_connection(config)
             except Exception as e:
@@ -285,44 +296,52 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
                 llm_error = "Connection to {} failed: {}".format(
                     config["provider"].title(), conn_msg
                 )
-                _emit(run_id, "log", {"message": "Connection test failed: {}".format(conn_msg)})
+                _emit(run_id, "log", {
+                      "message": "Connection test failed: {}".format(conn_msg)})
                 _emit(run_id, "progress", {
                     "step": 2, "total": 4,
                     "message": "AI connection failed. Using algorithmic analysis...",
                     "warning": True,
                 })
             else:
-                _emit(run_id, "log", {"message": "Connection OK. {}".format(conn_msg)})
+                _emit(run_id, "log", {
+                      "message": "Connection OK. {}".format(conn_msg)})
 
         if not skip_llm:
             try:
                 deep_review = config.get("_deep_review", False)
                 if deep_review:
                     config["batch_size"] = 2
-                    _emit(run_id, "log", {"message": "Deep review: using batch_size=2 for thorough per-repo analysis."})
+                    _emit(run_id, "log", {
+                          "message": "Deep review: using batch_size=2 for thorough per-repo analysis."})
 
                 _emit(run_id, "log", {
                     "message": "Sending {} repos to {} ({})...".format(
-                        repo_count, config["provider"].title(), config.get("model", "default")
+                        repo_count, config["provider"].title(
+                        ), config.get("model", "default")
                     ),
                 })
 
                 def on_batch_progress(msg):
                     _emit(run_id, "log", {"message": msg})
 
-                review = generate_review(data_path, config, on_progress=on_batch_progress)
+                review = generate_review(
+                    data_path, config, on_progress=on_batch_progress)
                 if _is_valid_review(review):
                     status = "success"
                     is_ai = True
                     review["is_ai_generated"] = True
-                    _emit(run_id, "log", {"message": "LLM response received and validated."})
+                    _emit(run_id, "log", {
+                          "message": "LLM response received and validated."})
                 else:
                     llm_error = "LLM returned incomplete data"
-                    _emit(run_id, "log", {"message": "LLM returned incomplete data."})
+                    _emit(run_id, "log", {
+                          "message": "LLM returned incomplete data."})
                     review = None
             except Exception as e:
                 llm_error = str(e)
-                _emit(run_id, "log", {"message": "LLM error: {}".format(llm_error)})
+                _emit(run_id, "log", {
+                      "message": "LLM error: {}".format(llm_error)})
                 review = None
 
         # Fallback if LLM failed
@@ -334,13 +353,15 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
                 ),
                 "warning": True,
             })
-            _emit(run_id, "log", {"message": "Computing algorithmic fallback scores..."})
+            _emit(run_id, "log", {
+                  "message": "Computing algorithmic fallback scores..."})
             review = compute_fallback_review(gh_data)
             review["fallback_reason"] = "AI analysis unavailable"
             review["fallback_detail"] = llm_error or "Unknown error"
             status = "algorithmic"
             is_ai = False
-            _emit(run_id, "log", {"message": "Algorithmic analysis complete. Score: {}".format(review.get("overall_score", 0))})
+            _emit(run_id, "log", {"message": "Algorithmic analysis complete. Score: {}".format(
+                review.get("overall_score", 0))})
 
         if _is_cancelled(run_id):
             _finish_cancelled(run_id)
@@ -368,7 +389,8 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
         with open(review_path, "w") as f:
             json.dump(review, f, indent=2)
         generate(review, templates_dir, output_dir, github_data=gh_data)
-        _emit(run_id, "log", {"message": "Report files written to {}.".format(output_dir)})
+        _emit(run_id, "log", {
+              "message": "Report files written to {}.".format(output_dir)})
 
         _emit(run_id, "progress", {
             "step": 4, "total": 4,

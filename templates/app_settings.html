@@ -35,9 +35,9 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Model</label>
                 <input type="text" id="model-input"
                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="claude-sonnet-4-20250514"
-                />
-                <p class="text-xs text-gray-400 mt-1.5" id="model-hint">Suggested: claude-sonnet-4-20250514, claude-haiku-4-5-20251001</p>
+                    placeholder="claude-sonnet-4-20250514" />
+                <p class="text-xs text-gray-400 mt-1.5" id="model-hint">Suggested: claude-sonnet-4-20250514,
+                    claude-haiku-4-5-20251001</p>
             </div>
 
             <!-- API Key -->
@@ -45,8 +45,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">API Key</label>
                 <input type="password" id="api-key-input"
                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="sk-..."
-                />
+                    placeholder="sk-..." />
                 {% if config.api_key_display %}
                 <p class="text-xs text-gray-400 mt-1.5">Current: {{ config.api_key_display }}</p>
                 {% endif %}
@@ -57,18 +56,17 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Ollama URL</label>
                 <input type="text" id="ollama-url-input"
                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ config.ollama_url or 'http://localhost:11434' }}"
-                />
+                    value="{{ config.ollama_url or 'http://localhost:11434' }}" />
             </div>
 
             <!-- Top Repos -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                    Repos to analyze in detail: <span id="top-repos-value" class="text-blue-600">{{ config.top_repos or 15 }}</span>
+                    Repos to analyze in detail: <span id="top-repos-value" class="text-blue-600">{{ config.top_repos or
+                        15 }}</span>
                 </label>
                 <input type="range" id="top-repos-input" min="5" max="30" value="{{ config.top_repos or 15 }}"
-                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
+                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                 <div class="flex justify-between text-xs text-gray-400 mt-1">
                     <span>5 (faster)</span>
                     <span>30 (thorough)</span>
@@ -78,24 +76,27 @@
             <!-- Batch Size -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                    Repos per LLM batch: <span id="batch-size-value" class="text-blue-600">{{ config.batch_size or 5 }}</span>
+                    Repos per LLM batch: <span id="batch-size-value" class="text-blue-600">{{ config.batch_size or 5
+                        }}</span>
                 </label>
                 <input type="range" id="batch-size-input" min="2" max="15" value="{{ config.batch_size or 5 }}"
-                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
+                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                 <div class="flex justify-between text-xs text-gray-400 mt-1">
                     <span>2 (most detailed)</span>
                     <span>15 (faster)</span>
                 </div>
-                <p class="text-xs text-gray-400 mt-1.5">When there are more repos than this, data is split into batches sent to the LLM separately. Smaller batches produce more detailed per-repo analysis.</p>
+                <p class="text-xs text-gray-400 mt-1.5">When there are more repos than this, data is split into batches
+                    sent to the LLM separately. Smaller batches produce more detailed per-repo analysis.</p>
             </div>
 
             <!-- Extended Thinking -->
             <div>
                 <div class="flex items-center justify-between">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Extended Thinking</label>
-                        <p class="text-xs text-gray-400 mt-0.5">Let the model reason longer before responding. Produces more detailed and nuanced reviews but takes more time and tokens.</p>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Extended
+                            Thinking</label>
+                        <p class="text-xs text-gray-400 mt-0.5">Let the model reason longer before responding. Produces
+                            more detailed and nuanced reviews but takes more time and tokens.</p>
                     </div>
                     <button type="button" id="thinking-toggle"
                         class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shrink-0 ml-4"
@@ -124,19 +125,20 @@
 </div>
 
 <script>
-(function() {
-    var currentProvider = '{{ config.provider or "anthropic" }}';
-    var modelInput = document.getElementById('model-input');
-    var apiKeySection = document.getElementById('api-key-section');
-    var ollamaUrlSection = document.getElementById('ollama-url-section');
-    var modelHint = document.getElementById('model-hint');
-    var topReposInput = document.getElementById('top-repos-input');
-    var topReposValue = document.getElementById('top-repos-value');
-    var batchSizeInput = document.getElementById('batch-size-input');
-    var batchSizeValue = document.getElementById('batch-size-value');
-    var feedback = document.getElementById('feedback');
-    var thinkingToggle = document.getElementById('thinking-toggle');
-    var thinkingEnabled = {{ 'true' if config.extended_thinking else 'false' }};
+    (function () {
+        var currentProvider = '{{ config.provider or "anthropic" }}';
+        var modelInput = document.getElementById('model-input');
+        var apiKeySection = document.getElementById('api-key-section');
+        var ollamaUrlSection = document.getElementById('ollama-url-section');
+        var modelHint = document.getElementById('model-hint');
+        var topReposInput = document.getElementById('top-repos-input');
+        var topReposValue = document.getElementById('top-repos-value');
+        var batchSizeInput = document.getElementById('batch-size-input');
+        var batchSizeValue = document.getElementById('batch-size-value');
+        var feedback = document.getElementById('feedback');
+        var thinkingToggle = document.getElementById('thinking-toggle');
+        var thinkingEnabled = {{ 'true' if config.extended_thinking else 'false' }
+    };
 
     function renderThinkingToggle() {
         var knob = thinkingToggle.querySelector('span');
@@ -154,7 +156,7 @@
     }
     renderThinkingToggle();
 
-    thinkingToggle.addEventListener('click', function() {
+    thinkingToggle.addEventListener('click', function () {
         thinkingEnabled = !thinkingEnabled;
         renderThinkingToggle();
     });
@@ -175,7 +177,7 @@
 
     function setProvider(provider) {
         currentProvider = provider;
-        document.querySelectorAll('.provider-btn').forEach(function(btn) {
+        document.querySelectorAll('.provider-btn').forEach(function (btn) {
             if (btn.dataset.provider === provider) {
                 btn.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700');
                 btn.classList.remove('border-gray-200', 'text-gray-600', 'dark:border-gray-600', 'dark:text-gray-300');
@@ -191,18 +193,18 @@
 
     setProvider(currentProvider);
 
-    document.querySelectorAll('.provider-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+    document.querySelectorAll('.provider-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
             setProvider(btn.dataset.provider);
             modelInput.value = defaultModels[btn.dataset.provider] || '';
         });
     });
 
-    topReposInput.addEventListener('input', function() {
+    topReposInput.addEventListener('input', function () {
         topReposValue.textContent = topReposInput.value;
     });
 
-    batchSizeInput.addEventListener('input', function() {
+    batchSizeInput.addEventListener('input', function () {
         batchSizeValue.textContent = batchSizeInput.value;
     });
 
@@ -212,10 +214,10 @@
             ? 'bg-red-50 text-red-700 border border-red-200'
             : 'bg-emerald-50 text-emerald-700 border border-emerald-200');
         feedback.classList.remove('hidden');
-        setTimeout(function() { feedback.classList.add('hidden'); }, 5000);
+        setTimeout(function () { feedback.classList.add('hidden'); }, 5000);
     }
 
-    document.getElementById('settings-form').addEventListener('submit', function(e) {
+    document.getElementById('settings-form').addEventListener('submit', function (e) {
         e.preventDefault();
         var data = {
             provider: currentProvider,
@@ -230,18 +232,18 @@
 
         fetch('/api/settings', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-        .then(function(r) { return r.json(); })
-        .then(function(resp) {
-            if (resp.ok) showFeedback('Settings saved!', false);
-            else showFeedback('Error saving settings', true);
-        })
-        .catch(function(err) { showFeedback('Error: ' + err.message, true); });
+            .then(function (r) { return r.json(); })
+            .then(function (resp) {
+                if (resp.ok) showFeedback('Settings saved!', false);
+                else showFeedback('Error saving settings', true);
+            })
+            .catch(function (err) { showFeedback('Error: ' + err.message, true); });
     });
 
-    document.getElementById('test-btn').addEventListener('click', function() {
+    document.getElementById('test-btn').addEventListener('click', function () {
         var btn = document.getElementById('test-btn');
         btn.textContent = 'Testing...';
         btn.disabled = true;
@@ -256,21 +258,21 @@
 
         fetch('/api/test-connection', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-        .then(function(r) { return r.json(); })
-        .then(function(resp) {
-            showFeedback(resp.message, !resp.success);
-            btn.textContent = 'Test Connection';
-            btn.disabled = false;
-        })
-        .catch(function(err) {
-            showFeedback('Error: ' + err.message, true);
-            btn.textContent = 'Test Connection';
-            btn.disabled = false;
-        });
+            .then(function (r) { return r.json(); })
+            .then(function (resp) {
+                showFeedback(resp.message, !resp.success);
+                btn.textContent = 'Test Connection';
+                btn.disabled = false;
+            })
+            .catch(function (err) {
+                showFeedback('Error: ' + err.message, true);
+                btn.textContent = 'Test Connection';
+                btn.disabled = false;
+            });
     });
-})();
+}) ();
 </script>
 {% endblock %}

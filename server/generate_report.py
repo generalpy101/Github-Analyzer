@@ -31,7 +31,8 @@ def md_inline(text):
     text = escape(text)
     text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
     text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', text)
-    text = re.sub(r'`([^`]+?)`', r'<code class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">\1</code>', text)
+    text = re.sub(
+        r'`([^`]+?)`', r'<code class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">\1</code>', text)
     text = re.sub(
         r'\[([^\]]+)\]\((https?://[^\)]+)\)',
         r'<a href="\2" target="_blank" class="text-blue-600 hover:underline">\1</a>',
@@ -71,7 +72,8 @@ def score_label(score: int) -> str:
 
 
 def ring_svg(score: int, size: int = 120, stroke: int = 8) -> str:
-    color_map = {"emerald": "#10b981", "blue": "#3b82f6", "amber": "#f59e0b", "red": "#ef4444"}
+    color_map = {"emerald": "#10b981", "blue": "#3b82f6",
+                 "amber": "#f59e0b", "red": "#ef4444"}
     color = color_map.get(score_color(score), "#3b82f6")
     radius = (size - stroke) / 2
     circumference = 2 * 3.14159 * radius
@@ -133,7 +135,8 @@ def recommendation_badge(rec):
         "keep": "bg-gray-100 text-gray-600 border-gray-200",
         "archive": "bg-red-100 text-red-600 border-red-200",
     }
-    icons_map = {"showcase": "&#9733;", "improve": "&#8593;", "keep": "&#10003;", "archive": "&#8986;"}
+    icons_map = {"showcase": "&#9733;", "improve": "&#8593;",
+                 "keep": "&#10003;", "archive": "&#8986;"}
     cls = colors.get(rec, colors["keep"])
     icon = icons_map.get(rec, "")
     return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border {cls}">{icon} {label}</span>'.format(
@@ -227,9 +230,9 @@ def build_completeness(completeness):
 def build_rp_stats(rp):
     html = ""
     for label, pct in [("README", rp.get("repos_with_readme_pct", 0)),
-                        ("Description", rp.get("repos_with_description_pct", 0)),
-                        ("License", rp.get("repos_with_license_pct", 0)),
-                        ("Topics", rp.get("repos_with_topics_pct", 0))]:
+                       ("Description", rp.get("repos_with_description_pct", 0)),
+                       ("License", rp.get("repos_with_license_pct", 0)),
+                       ("Topics", rp.get("repos_with_topics_pct", 0))]:
         bar_color = score_color(pct)
         html += (
             '<div>'
@@ -249,7 +252,8 @@ def build_highlights(highlights):
     html = ""
     for proj in highlights:
         langs = "".join(
-            '<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">{l}</span>'.format(l=escape(l))
+            '<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">{l}</span>'.format(
+                l=escape(l))
             for l in proj.get("languages", [])
         )
         html += """
@@ -277,19 +281,23 @@ def build_highlights(highlights):
             desc=md_inline(proj.get("description", "")),
             badge=complexity_badge(proj.get("technical_complexity", "medium")),
             langs=langs,
-            strengths=list_items(proj.get("strengths", []), "check", "emerald"),
-            improvements=list_items(proj.get("improvements", []), "arrow", "amber"),
+            strengths=list_items(
+                proj.get("strengths", []), "check", "emerald"),
+            improvements=list_items(
+                proj.get("improvements", []), "arrow", "amber"),
         )
     return html
 
 
 def build_categories(categories):
-    cat_colors = ["blue", "purple", "emerald", "amber", "rose", "cyan", "indigo", "teal"]
+    cat_colors = ["blue", "purple", "emerald",
+                  "amber", "rose", "cyan", "indigo", "teal"]
     html = ""
     for i, cat in enumerate(categories):
         c = cat_colors[i % len(cat_colors)]
         repos_tags = "".join(
-            '<span class="px-2 py-0.5 bg-{c}-50 text-{c}-600 rounded text-xs font-medium">{r}</span>'.format(c=c, r=escape(r))
+            '<span class="px-2 py-0.5 bg-{c}-50 text-{c}-600 rounded text-xs font-medium">{r}</span>'.format(
+                c=c, r=escape(r))
             for r in cat.get("repos", [])
         )
         html += """
@@ -327,7 +335,8 @@ def build_summary(summary):
     for para in summary.split("\n\n"):
         para = para.strip()
         if para:
-            html += '<p class="text-gray-200 leading-relaxed">{}</p>'.format(md_inline(para))
+            html += '<p class="text-gray-200 leading-relaxed">{}</p>'.format(
+                md_inline(para))
     return html
 
 
@@ -353,40 +362,48 @@ def build_repo_card(repo):
     category = escape(repo.get("category", ""))
     all_langs = repo.get("all_languages", [])
 
-    meta_badges = recommendation_badge(rec) + " " + complexity_badge(complexity)
+    meta_badges = recommendation_badge(
+        rec) + " " + complexity_badge(complexity)
     if is_private:
         meta_badges += ' <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-200">Private</span>'
 
     lang_tags = "".join(
-        '<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">{l}</span>'.format(l=escape(l))
+        '<span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">{l}</span>'.format(
+            l=escape(l))
         for l in all_langs[:6]
     )
 
     presence_html = ""
     for label, has in [("README", repo.get("has_readme", False)),
-                        ("License", repo.get("has_license", False)),
-                        ("Description", repo.get("has_description", False)),
-                        ("Topics", repo.get("has_topics", False))]:
+                       ("License", repo.get("has_license", False)),
+                       ("Description", repo.get("has_description", False)),
+                       ("Topics", repo.get("has_topics", False))]:
         if has:
-            presence_html += '<span class="text-xs text-emerald-600">&#10003; {}</span>'.format(label)
+            presence_html += '<span class="text-xs text-emerald-600">&#10003; {}</span>'.format(
+                label)
         else:
-            presence_html += '<span class="text-xs text-red-400">&#10007; {}</span>'.format(label)
+            presence_html += '<span class="text-xs text-red-400">&#10007; {}</span>'.format(
+                label)
 
     infra_html = ""
     for label, has in [("Tests", repo.get("has_tests", False)),
-                        ("CI/CD", repo.get("has_ci", False)),
-                        ("Docker", repo.get("has_docker", False)),
-                        ("Docs", repo.get("has_docs", False))]:
+                       ("CI/CD", repo.get("has_ci", False)),
+                       ("Docker", repo.get("has_docker", False)),
+                       ("Docs", repo.get("has_docs", False))]:
         if has:
-            infra_html += '<span class="text-xs text-blue-600">&#10003; {}</span>'.format(label)
+            infra_html += '<span class="text-xs text-blue-600">&#10003; {}</span>'.format(
+                label)
         else:
-            infra_html += '<span class="text-xs text-gray-400">&#10007; {}</span>'.format(label)
+            infra_html += '<span class="text-xs text-gray-400">&#10007; {}</span>'.format(
+                label)
 
     observations = repo.get("code_observations", [])
-    obs_html = list_items(observations, "check", "blue") if observations else ""
+    obs_html = list_items(observations, "check",
+                          "blue") if observations else ""
 
     strengths_html = list_items(repo.get("strengths", []), "check", "emerald")
-    improvements_html = list_items(repo.get("improvements", []), "arrow", "amber")
+    improvements_html = list_items(
+        repo.get("improvements", []), "arrow", "amber")
 
     commit_section = ""
     if commit_quality:
@@ -523,7 +540,8 @@ def build_contribution_graph(calendar_data):
     total = calendar_data.get("total_contributions", 0)
 
     max_count = max(
-        (d.get("contributionCount", 0) for w in weeks for d in w.get("contributionDays", [])),
+        (d.get("contributionCount", 0)
+         for w in weeks for d in w.get("contributionDays", [])),
         default=1,
     ) or 1
 
@@ -618,7 +636,8 @@ def build_language_bar(languages_dict):
         if pct < 0.5:
             continue
         color = lang_colors.get(lang, "#8b8b8b")
-        bar_parts += '<div style="width:{}%;background:{};height:8px;" title="{} {}%"></div>'.format(pct, color, escape(lang), pct)
+        bar_parts += '<div style="width:{}%;background:{};height:8px;" title="{} {}%"></div>'.format(
+            pct, color, escape(lang), pct)
         legend_parts += (
             '<div class="flex items-center gap-1.5">'
             '<span style="width:8px;height:8px;border-radius:50%;background:{};" class="shrink-0"></span>'
@@ -706,7 +725,8 @@ def build_infra_grid(fta):
             '<span>{files} files</span><span>{dirs} directories</span>'
         ).format(files=file_count, dirs=dir_count)
         for cfg in configs[:8]:
-            html += '<span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">{}</span>'.format(escape(cfg))
+            html += '<span class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">{}</span>'.format(
+                escape(cfg))
         html += '</div>'
 
     return html
@@ -777,7 +797,8 @@ def render_repo_detail(review, repo_name, github_data, templates_dir,
     if not repo_review:
         return None
 
-    details = (github_data or {}).get("top_repo_details", {}).get(repo_name, {})
+    details = (github_data or {}).get(
+        "top_repo_details", {}).get(repo_name, {})
 
     languages = details.get("languages", {})
     commits = details.get("recent_commits", [])
@@ -823,7 +844,8 @@ def render_repo_detail(review, repo_name, github_data, templates_dir,
         "ai_indicator": v["ai_indicator"],
     }
 
-    content = render_template(os.path.join(templates_dir, "repo_detail.html"), content_vars)
+    content = render_template(os.path.join(
+        templates_dir, "repo_detail.html"), content_vars)
 
     title = "{} - {} Review".format(escape(repo_name), v["username"])
     base_vars = {
@@ -862,7 +884,8 @@ def build_all_repo_cards(repo_reviews):
         groups.setdefault(rec, []).append(repo)
     for key in groups:
         groups[key].sort(key=lambda r: r.get("score", 0), reverse=True)
-    ordered = groups["showcase"] + groups["improve"] + groups["keep"] + groups["archive"]
+    ordered = groups["showcase"] + groups["improve"] + \
+        groups["keep"] + groups["archive"]
     return "".join(build_repo_card(r) for r in ordered)
 
 
@@ -873,7 +896,8 @@ def build_quick_nav(repo_reviews):
         groups.setdefault(rec, []).append(repo)
     for key in groups:
         groups[key].sort(key=lambda r: r.get("score", 0), reverse=True)
-    ordered = groups["showcase"] + groups["improve"] + groups["keep"] + groups["archive"]
+    ordered = groups["showcase"] + groups["improve"] + \
+        groups["keep"] + groups["archive"]
 
     html = ""
     for repo in ordered:
@@ -1035,13 +1059,17 @@ def _build_overview_html(review, templates_dir, github_data=None, run_id=None):
     pr, cr, rp, ar = v["pr"], v["cr"], v["rp"], v["ar"]
     repo_reviews = v["repo_reviews"]
 
-    primary_langs = cr.get("language_diversity", {}).get("primary_languages", [])
-    secondary_langs = cr.get("language_diversity", {}).get("secondary_languages", [])
+    primary_langs = cr.get("language_diversity", {}).get(
+        "primary_languages", [])
+    secondary_langs = cr.get("language_diversity", {}).get(
+        "secondary_languages", [])
     lang_tags = "".join(
-        '<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{l}</span>'.format(l=escape(l))
+        '<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{l}</span>'.format(
+            l=escape(l))
         for l in primary_langs
     ) + "".join(
-        '<span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">{l}</span>'.format(l=escape(l))
+        '<span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">{l}</span>'.format(
+            l=escape(l))
         for l in secondary_langs
     )
 
@@ -1051,7 +1079,8 @@ def _build_overview_html(review, templates_dir, github_data=None, run_id=None):
         profile_readme_section = (
             '<div class="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">'
             '<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Profile README Review</h3>'
-            '<p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">' + md_inline(readme_text) + '</p>'
+            '<p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">' +
+            md_inline(readme_text) + '</p>'
             '</div>'
         )
 
@@ -1113,7 +1142,7 @@ def _build_repos_html(review, templates_dir):
 
 
 def _wrap_base(content, v, templates_dir, page="overview", extra_css="", back_url="/",
-                nav_overview_url="index.html", nav_repos_url="repos.html", run_id=None):
+               nav_overview_url="index.html", nav_repos_url="repos.html", run_id=None):
     """Wrap page content in the base template."""
     is_overview = (page == "overview")
     base_vars = {
@@ -1154,7 +1183,8 @@ def render_overview(review, templates_dir, back_url="/",
                     nav_overview_url="index.html", nav_repos_url="repos.html",
                     github_data=None, run_id=None):
     """Render the overview page and return the full HTML string."""
-    content, v = _build_overview_html(review, templates_dir, github_data=github_data, run_id=run_id)
+    content, v = _build_overview_html(
+        review, templates_dir, github_data=github_data, run_id=run_id)
     return _wrap_base(content, v, templates_dir, page="overview", back_url=back_url,
                       nav_overview_url=nav_overview_url, nav_repos_url=nav_repos_url,
                       run_id=run_id)
@@ -1177,7 +1207,8 @@ def generate(review, templates_dir, output_dir=None, github_data=None):
     If output_dir is provided, writes files to disk (CLI usage).
     If output_dir is None, returns a dict of {"index.html": str, "repos.html": str}.
     """
-    index_html = render_overview(review, templates_dir, github_data=github_data)
+    index_html = render_overview(
+        review, templates_dir, github_data=github_data)
     repos_html = render_repos(review, templates_dir)
 
     if output_dir is None:
@@ -1195,10 +1226,13 @@ def generate(review, templates_dir, output_dir=None, github_data=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate HTML report from GitHub review JSON")
+    parser = argparse.ArgumentParser(
+        description="Generate HTML report from GitHub review JSON")
     parser.add_argument("review_json", help="Path to the review JSON file")
-    parser.add_argument("--output", "-o", default="runtime/output", help="Output directory")
-    parser.add_argument("--templates", "-t", default="templates", help="Templates directory")
+    parser.add_argument(
+        "--output", "-o", default="runtime/output", help="Output directory")
+    parser.add_argument("--templates", "-t",
+                        default="templates", help="Templates directory")
     args = parser.parse_args()
 
     with open(args.review_json) as f:

@@ -6,15 +6,24 @@
 <div class="max-w-2xl mx-auto px-6 py-12">
 
     <!-- AI Setup Banner (shown when AI is not configured) -->
-    <div id="ai-setup-banner" class="hidden mb-6 p-5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-2xl fade-in">
+    <div id="ai-setup-banner"
+        class="hidden mb-6 p-5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-2xl fade-in">
         <div class="flex items-start gap-3">
-            <svg class="w-6 h-6 text-amber-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg class="w-6 h-6 text-amber-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <div class="flex-1">
                 <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">AI is not configured</p>
-                <p class="text-xs text-amber-700 dark:text-amber-300 mt-1" id="ai-setup-msg">Set up your LLM provider to get AI-powered reviews with detailed insights. Without it, reviews use basic algorithmic scoring.</p>
+                <p class="text-xs text-amber-700 dark:text-amber-300 mt-1" id="ai-setup-msg">Set up your LLM provider to
+                    get AI-powered reviews with detailed insights. Without it, reviews use basic algorithmic scoring.
+                </p>
                 <div class="flex gap-2 mt-3">
-                    <a href="/settings" class="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-500 transition-colors">Go to Settings</a>
-                    <button id="dismiss-ai-banner" class="px-3 py-1.5 bg-white dark:bg-amber-800 text-amber-700 dark:text-amber-200 border border-amber-300 dark:border-amber-600 rounded-lg text-xs font-medium hover:bg-amber-50 dark:hover:bg-amber-700 transition-colors">Dismiss</button>
+                    <a href="/settings"
+                        class="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-500 transition-colors">Go
+                        to Settings</a>
+                    <button id="dismiss-ai-banner"
+                        class="px-3 py-1.5 bg-white dark:bg-amber-800 text-amber-700 dark:text-amber-200 border border-amber-300 dark:border-amber-600 rounded-lg text-xs font-medium hover:bg-amber-50 dark:hover:bg-amber-700 transition-colors">Dismiss</button>
                 </div>
             </div>
         </div>
@@ -23,26 +32,32 @@
     <!-- Generate Card -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 mb-8">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Review a GitHub Profile</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Enter a username or GitHub profile URL to generate a comprehensive review.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Enter a username or GitHub profile URL to generate a
+            comprehensive review.</p>
 
         <form id="generate-form" class="space-y-4">
             <div class="flex gap-3">
-                <input type="text" id="username-input" placeholder="e.g. generalpy101 or https://github.com/generalpy101"
+                <input type="text" id="username-input"
+                    placeholder="e.g. generalpy101 or https://github.com/generalpy101"
                     class="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autocomplete="off" spellcheck="false"
-                />
+                    autocomplete="off" spellcheck="false" />
                 <button type="submit" id="generate-btn"
                     class="px-6 py-3 bg-gray-800 text-white rounded-xl font-medium text-sm hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
-                    disabled
-                >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    disabled>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
                     Generate
                 </button>
                 <button type="button" id="deep-review-btn"
                     class="px-5 py-3 bg-purple-700 text-white rounded-xl font-medium text-sm hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
-                    disabled title="Fetches details for ALL repos and reviews each one individually. Slower but much more accurate."
-                >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    disabled
+                    title="Fetches details for ALL repos and reviews each one individually. Slower but much more accurate.">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
                     Deep Review
                 </button>
             </div>
@@ -51,34 +66,48 @@
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
                 <span class="text-xs text-gray-400 font-medium">Include:</span>
                 <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
-                    <input type="checkbox" id="filter-public" checked class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" id="filter-public" checked
+                        class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <span class="text-xs text-gray-600 dark:text-gray-300">Public</span>
                 </label>
                 <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
-                    <input type="checkbox" id="filter-private" class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" id="filter-private"
+                        class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <span class="text-xs text-gray-600 dark:text-gray-300">Private</span>
                 </label>
                 <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
-                    <input type="checkbox" id="filter-forked" class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" id="filter-forked"
+                        class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <span class="text-xs text-gray-600 dark:text-gray-300">Forked</span>
                 </label>
                 <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
-                    <input type="checkbox" id="filter-archived" class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <input type="checkbox" id="filter-archived"
+                        class="repo-filter w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <span class="text-xs text-gray-600 dark:text-gray-300">Archived</span>
                 </label>
             </div>
         </form>
 
         <!-- Cache notice -->
-        <div id="cache-notice" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-xl">
+        <div id="cache-notice"
+            class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-xl">
             <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <svg class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <div class="flex-1">
                     <p class="text-sm text-blue-800 font-medium">Cached data found</p>
-                    <p class="text-xs text-blue-600 mt-1">GitHub data for this user was fetched on <span id="cache-date"></span>.</p>
+                    <p class="text-xs text-blue-600 mt-1">GitHub data for this user was fetched on <span
+                            id="cache-date"></span>.</p>
                     <div class="flex gap-2 mt-3">
-                        <button id="use-cache-btn" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-500 transition-colors">Use cached data</button>
-                        <button id="fetch-fresh-btn" class="px-3 py-1.5 bg-white text-blue-700 border border-blue-300 rounded-lg text-xs font-medium hover:bg-blue-50 transition-colors">Fetch fresh data</button>
+                        <button id="use-cache-btn"
+                            class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-500 transition-colors">Use
+                            cached data</button>
+                        <button id="fetch-fresh-btn"
+                            class="px-3 py-1.5 bg-white text-blue-700 border border-blue-300 rounded-lg text-xs font-medium hover:bg-blue-50 transition-colors">Fetch
+                            fresh data</button>
                     </div>
                 </div>
             </div>
@@ -92,24 +121,33 @@
 
             <!-- Verbose logs dropdown -->
             <details id="verbose-logs" class="mt-4">
-                <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none flex items-center gap-1">
-                    <svg class="w-3 h-3 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <summary
+                    class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none flex items-center gap-1">
+                    <svg class="w-3 h-3 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
                     Show details <span id="log-count" class="text-gray-300">(0)</span>
                 </summary>
-                <div id="log-container" class="mt-2 max-h-48 overflow-y-auto bg-gray-900 rounded-xl p-3 font-mono text-xs text-gray-300 space-y-0.5">
+                <div id="log-container"
+                    class="mt-2 max-h-48 overflow-y-auto bg-gray-900 rounded-xl p-3 font-mono text-xs text-gray-300 space-y-0.5">
                 </div>
             </details>
 
             <!-- Error -->
-            <div id="error-msg" class="hidden mt-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl">
+            <div id="error-msg"
+                class="hidden mt-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl">
                 <p class="text-sm text-red-700 font-medium">Error</p>
                 <p class="text-sm text-red-600 mt-1" id="error-text"></p>
             </div>
 
             <!-- Complete -->
             <div id="complete-section" class="hidden mt-6 text-center fade-in">
-                <a id="report-link" href="#" class="inline-flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white rounded-xl font-medium text-sm hover:bg-emerald-500 transition-colors">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <a id="report-link" href="#"
+                    class="inline-flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white rounded-xl font-medium text-sm hover:bg-emerald-500 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
                     View Report
                 </a>
             </div>
@@ -122,21 +160,28 @@
         <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Previous Reviews</h2>
         <div class="mb-4">
             <input type="text" id="history-search" placeholder="Search by username..."
-                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
         </div>
         <div class="space-y-2" id="history-list">
             {% for item in history %}
-            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group" data-run-id="{{ item.id }}">
+            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
+                data-run-id="{{ item.id }}">
                 <a href="{{ item.url }}" class="flex items-center gap-3 flex-1 min-w-0">
                     <!-- Score badge -->
                     {% if item.status == 'pending' %}
                     <div class="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4 text-blue-500 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <svg class="w-4 h-4 text-blue-500 spinner" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
                     </div>
                     {% elif item.status == 'error' %}
                     <div class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </div>
                     {% elif item.overall_score >= 80 %}
                     <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
@@ -157,36 +202,56 @@
                     {% endif %}
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-600">{{ item.username }}</span>
+                            <span
+                                class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-600">{{
+                                item.username }}</span>
                             {% if item.status == 'pending' %}
-                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-200">
+                            <span
+                                class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-200">
                                 In Progress
                             </span>
                             {% elif item.status == 'error' %}
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-500 border border-red-200">Failed</span>
+                            <span
+                                class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-500 border border-red-200">Failed</span>
                             {% elif item.is_ai_generated %}
-                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-600 border border-purple-200">
-                                <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.09 6.26L20 9.27l-4.91 3.82L16.18 20 12 16.77 7.82 20l1.09-6.91L4 9.27l5.91-1.01z"/></svg>
+                            <span
+                                class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-600 border border-purple-200">
+                                <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 2l2.09 6.26L20 9.27l-4.91 3.82L16.18 20 12 16.77 7.82 20l1.09-6.91L4 9.27l5.91-1.01z" />
+                                </svg>
                                 AI
                             </span>
                             {% elif item.status == 'algorithmic' %}
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500">Algo</span>
+                            <span
+                                class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500">Algo</span>
                             {% endif %}
                         </div>
                         <div class="text-[11px] text-gray-400 mt-0.5">
-                            {% if item.provider %}{{ item.provider | title }}{% if item.model %} · {{ item.model }}{% endif %}{% endif %}
+                            {% if item.provider %}{{ item.provider | title }}{% if item.model %} · {{ item.model }}{%
+                            endif %}{% endif %}
                         </div>
                     </div>
                 </a>
                 <div class="flex items-center gap-2 shrink-0 ml-2">
                     <span class="text-xs text-gray-400">{{ item.generated_at }}</span>
                     {% if item.status == 'pending' %}
-                    <button onclick="stopRun({{ item.id }}, this)" title="Stop" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                    <button onclick="stopRun({{ item.id }}, this)" title="Stop"
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
                     </button>
                     {% else %}
-                    <button onclick="deleteRun({{ item.id }}, this)" title="Delete" class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <button onclick="deleteRun({{ item.id }}, this)" title="Delete"
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                     </button>
                     {% endif %}
                 </div>
@@ -202,407 +267,409 @@
 </div>
 
 <style>
-    details[open] > summary svg:first-child { transform: rotate(90deg); }
+    details[open]>summary svg:first-child {
+        transform: rotate(90deg);
+    }
 </style>
 
 <script>
-function stopRun(runId, btn) {
-    btn.disabled = true;
-    fetch('/api/stop-run/' + runId, {method: 'POST'})
-        .then(function() { location.reload(); })
-        .catch(function() { location.reload(); });
-}
+    function stopRun(runId, btn) {
+        btn.disabled = true;
+        fetch('/api/stop-run/' + runId, { method: 'POST' })
+            .then(function () { location.reload(); })
+            .catch(function () { location.reload(); });
+    }
 
-function deleteRun(runId, btn) {
-    var row = btn.closest('[data-run-id]');
-    btn.disabled = true;
-    fetch('/api/delete-run/' + runId, {method: 'POST'})
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.deleted && row) {
-                row.style.transition = 'opacity 0.2s, max-height 0.3s';
-                row.style.opacity = '0';
-                row.style.maxHeight = row.offsetHeight + 'px';
-                setTimeout(function() {
-                    row.style.maxHeight = '0';
-                    row.style.padding = '0';
-                    row.style.margin = '0';
-                    row.style.overflow = 'hidden';
-                }, 200);
-                setTimeout(function() { row.remove(); }, 500);
-            } else {
-                location.reload();
-            }
-        })
-        .catch(function() { location.reload(); });
-}
-
-(function() {
-    var input = document.getElementById('username-input');
-    var btn = document.getElementById('generate-btn');
-    var deepBtn = document.getElementById('deep-review-btn');
-    var form = document.getElementById('generate-form');
-    var progressSection = document.getElementById('progress-section');
-    var progressSteps = document.getElementById('progress-steps');
-    var errorMsg = document.getElementById('error-msg');
-    var errorText = document.getElementById('error-text');
-    var completeSection = document.getElementById('complete-section');
-    var reportLink = document.getElementById('report-link');
-    var cacheNotice = document.getElementById('cache-notice');
-    var cacheDate = document.getElementById('cache-date');
-    var useCacheBtn = document.getElementById('use-cache-btn');
-    var fetchFreshBtn = document.getElementById('fetch-fresh-btn');
-    var logContainer = document.getElementById('log-container');
-    var logCount = document.getElementById('log-count');
-    var verboseLogs = document.getElementById('verbose-logs');
-    var aiBanner = document.getElementById('ai-setup-banner');
-    var aiSetupMsg = document.getElementById('ai-setup-msg');
-    var dismissAiBtn = document.getElementById('dismiss-ai-banner');
-
-    var aiConfigured = true;  // assume true until checked
-
-    // Check AI status on page load
-    fetch('/api/ai-status')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            aiConfigured = data.configured && data.connected;
-            if (!data.configured) {
-                // No API key at all — show setup banner (unless dismissed this session)
-                if (!sessionStorage.getItem('ai-banner-dismissed')) {
-                    aiBanner.classList.remove('hidden');
-                    aiSetupMsg.textContent = data.message || 'Set up your LLM provider to get AI-powered reviews.';
+    function deleteRun(runId, btn) {
+        var row = btn.closest('[data-run-id]');
+        btn.disabled = true;
+        fetch('/api/delete-run/' + runId, { method: 'POST' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.deleted && row) {
+                    row.style.transition = 'opacity 0.2s, max-height 0.3s';
+                    row.style.opacity = '0';
+                    row.style.maxHeight = row.offsetHeight + 'px';
+                    setTimeout(function () {
+                        row.style.maxHeight = '0';
+                        row.style.padding = '0';
+                        row.style.margin = '0';
+                        row.style.overflow = 'hidden';
+                    }, 200);
+                    setTimeout(function () { row.remove(); }, 500);
+                } else {
+                    location.reload();
                 }
-            } else if (!data.connected) {
-                // Has config but connection failed — show warning banner
-                if (!sessionStorage.getItem('ai-banner-dismissed')) {
-                    aiBanner.classList.remove('hidden');
-                    aiSetupMsg.textContent = 'AI connection failed: ' + (data.message || 'Unknown error') + '. Reviews will use algorithmic scoring until this is fixed.';
-                }
-            }
-        })
-        .catch(function() {});
-
-    dismissAiBtn.addEventListener('click', function() {
-        aiBanner.style.transition = 'opacity 0.2s, max-height 0.3s';
-        aiBanner.style.opacity = '0';
-        setTimeout(function() { aiBanner.classList.add('hidden'); aiBanner.style.opacity = ''; }, 200);
-        sessionStorage.setItem('ai-banner-dismissed', '1');
-    });
-
-    var stepLabels = [
-        'Fetching GitHub data...',
-        'Analyzing with LLM...',
-        'Generating HTML report...',
-        'Done!'
-    ];
-
-    var pendingUsername = null;
-    var activeSource = null;
-    var activeRunId = null;
-    var isGenerating = false;
-    var generateBtnDefault = btn.innerHTML;
-    var cancelBtnHtml = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Cancel';
-
-    input.addEventListener('input', function() {
-        var hasVal = !!input.value.trim();
-        if (!isGenerating) { btn.disabled = !hasVal; deepBtn.disabled = !hasVal; }
-        cacheNotice.classList.add('hidden');
-    });
-
-    function extractUsername(val) {
-        val = val.trim().replace(/\/+$/, '');
-        var m = val.match(/github\.com\/([a-zA-Z0-9_-]+)/);
-        if (m) return m[1];
-        m = val.match(/^[a-zA-Z0-9_-]+$/);
-        if (m) return val;
-        return null;
-    }
-
-    function renderSteps(currentStep, total, message) {
-        var html = '';
-        for (var i = 1; i <= total; i++) {
-            var icon, textClass;
-            if (i < currentStep) {
-                icon = '<svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-                textClass = 'text-gray-500';
-            } else if (i === currentStep) {
-                icon = '<svg class="w-5 h-5 text-blue-500 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
-                textClass = 'text-gray-800 font-medium';
-            } else {
-                icon = '<div class="w-5 h-5 rounded-full border-2 border-gray-200"></div>';
-                textClass = 'text-gray-400';
-            }
-            var label = (i === currentStep && message) ? message : stepLabels[i-1];
-            html += '<div class="flex items-center gap-3 py-2">' + icon + '<span class="text-sm ' + textClass + '">' + label + '</span></div>';
-        }
-        progressSteps.innerHTML = html;
-    }
-
-    function addLog(message) {
-        var line = document.createElement('div');
-        var ts = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'});
-        line.innerHTML = '<span class="text-gray-500">' + ts + '</span> ' + message;
-        logContainer.appendChild(line);
-        logCount.textContent = '(' + logContainer.children.length + ')';
-        logContainer.scrollTop = logContainer.scrollHeight;
-    }
-
-    function clearLogs() {
-        logContainer.innerHTML = '';
-        logCount.textContent = '(0)';
-    }
-
-    function resetBtn() {
-        isGenerating = false;
-        activeRunId = null;
-        var hasVal = !!input.value.trim();
-        btn.disabled = !hasVal;
-        deepBtn.disabled = !hasVal;
-        deepBtn.classList.remove('hidden');
-        btn.innerHTML = generateBtnDefault;
-        btn.classList.remove('bg-red-600', 'hover:bg-red-500');
-        btn.classList.add('bg-gray-800', 'hover:bg-gray-700');
-    }
-
-    function cancelGeneration() {
-        if (activeSource) {
-            activeSource.close();
-            activeSource = null;
-        }
-        if (activeRunId) {
-            fetch('/api/cancel-generation/' + activeRunId, {method: 'POST'});
-        }
-        progressSection.classList.add('hidden');
-        errorMsg.classList.add('hidden');
-        completeSection.classList.add('hidden');
-        resetBtn();
-    }
-
-    function showGeneratingUI(username) {
-        isGenerating = true;
-        btn.disabled = false;
-        btn.innerHTML = cancelBtnHtml;
-        btn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
-        btn.classList.add('bg-red-600', 'hover:bg-red-500');
-        deepBtn.classList.add('hidden');
-        cacheNotice.classList.add('hidden');
-        progressSection.classList.remove('hidden');
-        errorMsg.classList.add('hidden');
-        completeSection.classList.add('hidden');
-        if (username) {
-            input.value = username;
-        }
-    }
-
-    function connectSSE(runId) {
-        if (activeSource) {
-            activeSource.close();
-        }
-        activeRunId = runId;
-
-        var source = new EventSource('/api/generation-progress/' + runId);
-        activeSource = source;
-
-        source.addEventListener('progress', function(e) {
-            var data = JSON.parse(e.data);
-            renderSteps(data.step, data.total, data.message);
-        });
-
-        source.addEventListener('log', function(e) {
-            var data = JSON.parse(e.data);
-            addLog(data.message);
-        });
-
-        source.addEventListener('complete', function(e) {
-            source.close();
-            activeSource = null;
-            var data = JSON.parse(e.data);
-            renderSteps(5, 4, '');
-            completeSection.classList.remove('hidden');
-            reportLink.href = data.report_url;
-            addLog('Review complete! Score: ' + (data.status === 'algorithmic' ? 'Algorithmic' : 'AI') + ' analysis.');
-            resetBtn();
-        });
-
-        source.addEventListener('error', function(e) {
-            if (e.data) {
-                var data = JSON.parse(e.data);
-                errorMsg.classList.remove('hidden');
-                errorText.textContent = data.message;
-                addLog('Error: ' + data.message);
-            } else if (source.readyState === EventSource.CLOSED) {
-                // Server closed the connection normally (generation done)
-            } else {
-                errorMsg.classList.remove('hidden');
-                errorText.textContent = 'Connection lost. The generation continues in the background.';
-                addLog('SSE connection lost. Generation continues server-side.');
-            }
-            source.close();
-            activeSource = null;
-            resetBtn();
-        });
-    }
-
-    function getFilterParams() {
-        var params = [];
-        if (document.getElementById('filter-public').checked) params.push('include_public=1');
-        if (document.getElementById('filter-private').checked) params.push('include_private=1');
-        if (document.getElementById('filter-forked').checked) params.push('include_forked=1');
-        if (document.getElementById('filter-archived').checked) params.push('include_archived=1');
-        return params;
-    }
-
-    var isDeepReview = false;
-
-    function startGeneration(username, useCache) {
-        clearLogs();
-        showGeneratingUI(username);
-        renderSteps(1, 4, isDeepReview ? 'Starting deep review...' : 'Starting...');
-        if (!aiConfigured) {
-            addLog('Warning: AI is not configured. Review will use algorithmic scoring only.');
-        }
-        if (isDeepReview) {
-            addLog('Deep review mode: fetching details for ALL repos, reviewing each individually.');
-        }
-        addLog('Requesting generation for @' + username + (useCache ? ' (using cache)' : '') + '...');
-
-        var params = getFilterParams();
-        if (useCache) params.push('use_cache=1');
-        if (isDeepReview) params.push('deep_review=1');
-        var url = '/api/generate/' + encodeURIComponent(username);
-        if (params.length) url += '?' + params.join('&');
-
-        fetch(url, {method: 'POST'})
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.error) {
-                    errorMsg.classList.remove('hidden');
-                    errorText.textContent = data.error;
-                    addLog('Error: ' + data.error);
-                    resetBtn();
-                    return;
-                }
-                if (data.conflict) {
-                    addLog('A generation is already running. Reconnecting...');
-                }
-                connectSSE(data.run_id);
             })
-            .catch(function(err) {
-                errorMsg.classList.remove('hidden');
-                errorText.textContent = 'Failed to start generation. Is the server running?';
-                addLog('Fetch error: ' + err.message);
+            .catch(function () { location.reload(); });
+    }
+
+    (function () {
+        var input = document.getElementById('username-input');
+        var btn = document.getElementById('generate-btn');
+        var deepBtn = document.getElementById('deep-review-btn');
+        var form = document.getElementById('generate-form');
+        var progressSection = document.getElementById('progress-section');
+        var progressSteps = document.getElementById('progress-steps');
+        var errorMsg = document.getElementById('error-msg');
+        var errorText = document.getElementById('error-text');
+        var completeSection = document.getElementById('complete-section');
+        var reportLink = document.getElementById('report-link');
+        var cacheNotice = document.getElementById('cache-notice');
+        var cacheDate = document.getElementById('cache-date');
+        var useCacheBtn = document.getElementById('use-cache-btn');
+        var fetchFreshBtn = document.getElementById('fetch-fresh-btn');
+        var logContainer = document.getElementById('log-container');
+        var logCount = document.getElementById('log-count');
+        var verboseLogs = document.getElementById('verbose-logs');
+        var aiBanner = document.getElementById('ai-setup-banner');
+        var aiSetupMsg = document.getElementById('ai-setup-msg');
+        var dismissAiBtn = document.getElementById('dismiss-ai-banner');
+
+        var aiConfigured = true;  // assume true until checked
+
+        // Check AI status on page load
+        fetch('/api/ai-status')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                aiConfigured = data.configured && data.connected;
+                if (!data.configured) {
+                    // No API key at all — show setup banner (unless dismissed this session)
+                    if (!sessionStorage.getItem('ai-banner-dismissed')) {
+                        aiBanner.classList.remove('hidden');
+                        aiSetupMsg.textContent = data.message || 'Set up your LLM provider to get AI-powered reviews.';
+                    }
+                } else if (!data.connected) {
+                    // Has config but connection failed — show warning banner
+                    if (!sessionStorage.getItem('ai-banner-dismissed')) {
+                        aiBanner.classList.remove('hidden');
+                        aiSetupMsg.textContent = 'AI connection failed: ' + (data.message || 'Unknown error') + '. Reviews will use algorithmic scoring until this is fixed.';
+                    }
+                }
+            })
+            .catch(function () { });
+
+        dismissAiBtn.addEventListener('click', function () {
+            aiBanner.style.transition = 'opacity 0.2s, max-height 0.3s';
+            aiBanner.style.opacity = '0';
+            setTimeout(function () { aiBanner.classList.add('hidden'); aiBanner.style.opacity = ''; }, 200);
+            sessionStorage.setItem('ai-banner-dismissed', '1');
+        });
+
+        var stepLabels = [
+            'Fetching GitHub data...',
+            'Analyzing with LLM...',
+            'Generating HTML report...',
+            'Done!'
+        ];
+
+        var pendingUsername = null;
+        var activeSource = null;
+        var activeRunId = null;
+        var isGenerating = false;
+        var generateBtnDefault = btn.innerHTML;
+        var cancelBtnHtml = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Cancel';
+
+        input.addEventListener('input', function () {
+            var hasVal = !!input.value.trim();
+            if (!isGenerating) { btn.disabled = !hasVal; deepBtn.disabled = !hasVal; }
+            cacheNotice.classList.add('hidden');
+        });
+
+        function extractUsername(val) {
+            val = val.trim().replace(/\/+$/, '');
+            var m = val.match(/github\.com\/([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            m = val.match(/^[a-zA-Z0-9_-]+$/);
+            if (m) return val;
+            return null;
+        }
+
+        function renderSteps(currentStep, total, message) {
+            var html = '';
+            for (var i = 1; i <= total; i++) {
+                var icon, textClass;
+                if (i < currentStep) {
+                    icon = '<svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                    textClass = 'text-gray-500';
+                } else if (i === currentStep) {
+                    icon = '<svg class="w-5 h-5 text-blue-500 spinner" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
+                    textClass = 'text-gray-800 font-medium';
+                } else {
+                    icon = '<div class="w-5 h-5 rounded-full border-2 border-gray-200"></div>';
+                    textClass = 'text-gray-400';
+                }
+                var label = (i === currentStep && message) ? message : stepLabels[i - 1];
+                html += '<div class="flex items-center gap-3 py-2">' + icon + '<span class="text-sm ' + textClass + '">' + label + '</span></div>';
+            }
+            progressSteps.innerHTML = html;
+        }
+
+        function addLog(message) {
+            var line = document.createElement('div');
+            var ts = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            line.innerHTML = '<span class="text-gray-500">' + ts + '</span> ' + message;
+            logContainer.appendChild(line);
+            logCount.textContent = '(' + logContainer.children.length + ')';
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            logContainer.innerHTML = '';
+            logCount.textContent = '(0)';
+        }
+
+        function resetBtn() {
+            isGenerating = false;
+            activeRunId = null;
+            var hasVal = !!input.value.trim();
+            btn.disabled = !hasVal;
+            deepBtn.disabled = !hasVal;
+            deepBtn.classList.remove('hidden');
+            btn.innerHTML = generateBtnDefault;
+            btn.classList.remove('bg-red-600', 'hover:bg-red-500');
+            btn.classList.add('bg-gray-800', 'hover:bg-gray-700');
+        }
+
+        function cancelGeneration() {
+            if (activeSource) {
+                activeSource.close();
+                activeSource = null;
+            }
+            if (activeRunId) {
+                fetch('/api/cancel-generation/' + activeRunId, { method: 'POST' });
+            }
+            progressSection.classList.add('hidden');
+            errorMsg.classList.add('hidden');
+            completeSection.classList.add('hidden');
+            resetBtn();
+        }
+
+        function showGeneratingUI(username) {
+            isGenerating = true;
+            btn.disabled = false;
+            btn.innerHTML = cancelBtnHtml;
+            btn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
+            btn.classList.add('bg-red-600', 'hover:bg-red-500');
+            deepBtn.classList.add('hidden');
+            cacheNotice.classList.add('hidden');
+            progressSection.classList.remove('hidden');
+            errorMsg.classList.add('hidden');
+            completeSection.classList.add('hidden');
+            if (username) {
+                input.value = username;
+            }
+        }
+
+        function connectSSE(runId) {
+            if (activeSource) {
+                activeSource.close();
+            }
+            activeRunId = runId;
+
+            var source = new EventSource('/api/generation-progress/' + runId);
+            activeSource = source;
+
+            source.addEventListener('progress', function (e) {
+                var data = JSON.parse(e.data);
+                renderSteps(data.step, data.total, data.message);
+            });
+
+            source.addEventListener('log', function (e) {
+                var data = JSON.parse(e.data);
+                addLog(data.message);
+            });
+
+            source.addEventListener('complete', function (e) {
+                source.close();
+                activeSource = null;
+                var data = JSON.parse(e.data);
+                renderSteps(5, 4, '');
+                completeSection.classList.remove('hidden');
+                reportLink.href = data.report_url;
+                addLog('Review complete! Score: ' + (data.status === 'algorithmic' ? 'Algorithmic' : 'AI') + ' analysis.');
                 resetBtn();
             });
-    }
 
-    // Cache buttons
-    useCacheBtn.addEventListener('click', function() {
-        if (pendingUsername) startGeneration(pendingUsername, true);
-    });
-    fetchFreshBtn.addEventListener('click', function() {
-        if (pendingUsername) startGeneration(pendingUsername, false);
-    });
-
-    // Generate button also acts as cancel when generating
-    btn.addEventListener('click', function(e) {
-        if (isGenerating) {
-            e.preventDefault();
-            e.stopPropagation();
-            cancelGeneration();
-            return false;
-        }
-        isDeepReview = false;
-    });
-
-    deepBtn.addEventListener('click', function() {
-        if (isGenerating) return;
-        var username = extractUsername(input.value);
-        if (!username) {
-            errorMsg.classList.remove('hidden');
-            errorText.textContent = 'Invalid GitHub username or URL.';
-            return;
-        }
-        isDeepReview = true;
-        pendingUsername = username;
-        errorMsg.classList.add('hidden');
-
-        fetch('/api/check-cache/' + encodeURIComponent(username))
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.cached) {
-                    cacheDate.textContent = data.fetched_at;
-                    cacheNotice.classList.remove('hidden');
+            source.addEventListener('error', function (e) {
+                if (e.data) {
+                    var data = JSON.parse(e.data);
+                    errorMsg.classList.remove('hidden');
+                    errorText.textContent = data.message;
+                    addLog('Error: ' + data.message);
+                } else if (source.readyState === EventSource.CLOSED) {
+                    // Server closed the connection normally (generation done)
                 } else {
-                    startGeneration(username, false);
+                    errorMsg.classList.remove('hidden');
+                    errorText.textContent = 'Connection lost. The generation continues in the background.';
+                    addLog('SSE connection lost. Generation continues server-side.');
                 }
-            })
-            .catch(function() { startGeneration(username, false); });
-    });
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (isGenerating) { cancelGeneration(); return; }
-        isDeepReview = false;
-        var username = extractUsername(input.value);
-        if (!username) {
-            errorMsg.classList.remove('hidden');
-            errorText.textContent = 'Invalid GitHub username or URL.';
-            return;
+                source.close();
+                activeSource = null;
+                resetBtn();
+            });
         }
 
-        pendingUsername = username;
-        errorMsg.classList.add('hidden');
+        function getFilterParams() {
+            var params = [];
+            if (document.getElementById('filter-public').checked) params.push('include_public=1');
+            if (document.getElementById('filter-private').checked) params.push('include_private=1');
+            if (document.getElementById('filter-forked').checked) params.push('include_forked=1');
+            if (document.getElementById('filter-archived').checked) params.push('include_archived=1');
+            return params;
+        }
 
-        // Check for cached data
-        fetch('/api/check-cache/' + encodeURIComponent(username))
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.cached) {
-                    cacheDate.textContent = data.fetched_at;
-                    cacheNotice.classList.remove('hidden');
-                } else {
-                    startGeneration(username, false);
-                }
-            })
-            .catch(function() {
-                startGeneration(username, false);
-            });
-    });
+        var isDeepReview = false;
 
-    // History search/filter
-    var historySearch = document.getElementById('history-search');
-    if (historySearch) {
-        var historyRows = document.querySelectorAll('[data-run-id]');
-        var noResults = document.getElementById('history-no-results');
-        historySearch.addEventListener('input', function() {
-            var q = historySearch.value.trim().toLowerCase();
-            var visible = 0;
-            historyRows.forEach(function(row) {
-                var name = row.querySelector('.text-sm.font-medium');
-                var username = name ? name.textContent.trim().toLowerCase() : '';
-                var show = !q || username.indexOf(q) !== -1;
-                row.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-            if (noResults) noResults.classList.toggle('hidden', visible > 0);
-        });
-    }
-
-    // On page load: check if a generation is already running (e.g. user navigated away and back)
-    fetch('/api/active-generation')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.active) {
-                clearLogs();
-                showGeneratingUI(data.username);
-                renderSteps(1, 4, 'Reconnecting to in-progress generation...');
-                addLog('Found active generation for @' + data.username + '. Reconnecting...');
-                connectSSE(data.run_id);
+        function startGeneration(username, useCache) {
+            clearLogs();
+            showGeneratingUI(username);
+            renderSteps(1, 4, isDeepReview ? 'Starting deep review...' : 'Starting...');
+            if (!aiConfigured) {
+                addLog('Warning: AI is not configured. Review will use algorithmic scoring only.');
             }
-        })
-        .catch(function() {
-            // Ignore — no active generation
+            if (isDeepReview) {
+                addLog('Deep review mode: fetching details for ALL repos, reviewing each individually.');
+            }
+            addLog('Requesting generation for @' + username + (useCache ? ' (using cache)' : '') + '...');
+
+            var params = getFilterParams();
+            if (useCache) params.push('use_cache=1');
+            if (isDeepReview) params.push('deep_review=1');
+            var url = '/api/generate/' + encodeURIComponent(username);
+            if (params.length) url += '?' + params.join('&');
+
+            fetch(url, { method: 'POST' })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.error) {
+                        errorMsg.classList.remove('hidden');
+                        errorText.textContent = data.error;
+                        addLog('Error: ' + data.error);
+                        resetBtn();
+                        return;
+                    }
+                    if (data.conflict) {
+                        addLog('A generation is already running. Reconnecting...');
+                    }
+                    connectSSE(data.run_id);
+                })
+                .catch(function (err) {
+                    errorMsg.classList.remove('hidden');
+                    errorText.textContent = 'Failed to start generation. Is the server running?';
+                    addLog('Fetch error: ' + err.message);
+                    resetBtn();
+                });
+        }
+
+        // Cache buttons
+        useCacheBtn.addEventListener('click', function () {
+            if (pendingUsername) startGeneration(pendingUsername, true);
         });
-})();
+        fetchFreshBtn.addEventListener('click', function () {
+            if (pendingUsername) startGeneration(pendingUsername, false);
+        });
+
+        // Generate button also acts as cancel when generating
+        btn.addEventListener('click', function (e) {
+            if (isGenerating) {
+                e.preventDefault();
+                e.stopPropagation();
+                cancelGeneration();
+                return false;
+            }
+            isDeepReview = false;
+        });
+
+        deepBtn.addEventListener('click', function () {
+            if (isGenerating) return;
+            var username = extractUsername(input.value);
+            if (!username) {
+                errorMsg.classList.remove('hidden');
+                errorText.textContent = 'Invalid GitHub username or URL.';
+                return;
+            }
+            isDeepReview = true;
+            pendingUsername = username;
+            errorMsg.classList.add('hidden');
+
+            fetch('/api/check-cache/' + encodeURIComponent(username))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.cached) {
+                        cacheDate.textContent = data.fetched_at;
+                        cacheNotice.classList.remove('hidden');
+                    } else {
+                        startGeneration(username, false);
+                    }
+                })
+                .catch(function () { startGeneration(username, false); });
+        });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (isGenerating) { cancelGeneration(); return; }
+            isDeepReview = false;
+            var username = extractUsername(input.value);
+            if (!username) {
+                errorMsg.classList.remove('hidden');
+                errorText.textContent = 'Invalid GitHub username or URL.';
+                return;
+            }
+
+            pendingUsername = username;
+            errorMsg.classList.add('hidden');
+
+            // Check for cached data
+            fetch('/api/check-cache/' + encodeURIComponent(username))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.cached) {
+                        cacheDate.textContent = data.fetched_at;
+                        cacheNotice.classList.remove('hidden');
+                    } else {
+                        startGeneration(username, false);
+                    }
+                })
+                .catch(function () {
+                    startGeneration(username, false);
+                });
+        });
+
+        // History search/filter
+        var historySearch = document.getElementById('history-search');
+        if (historySearch) {
+            var historyRows = document.querySelectorAll('[data-run-id]');
+            var noResults = document.getElementById('history-no-results');
+            historySearch.addEventListener('input', function () {
+                var q = historySearch.value.trim().toLowerCase();
+                var visible = 0;
+                historyRows.forEach(function (row) {
+                    var name = row.querySelector('.text-sm.font-medium');
+                    var username = name ? name.textContent.trim().toLowerCase() : '';
+                    var show = !q || username.indexOf(q) !== -1;
+                    row.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+                if (noResults) noResults.classList.toggle('hidden', visible > 0);
+            });
+        }
+
+        // On page load: check if a generation is already running (e.g. user navigated away and back)
+        fetch('/api/active-generation')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.active) {
+                    clearLogs();
+                    showGeneratingUI(data.username);
+                    renderSteps(1, 4, 'Reconnecting to in-progress generation...');
+                    addLog('Found active generation for @' + data.username + '. Reconnecting...');
+                    connectSSE(data.run_id);
+                }
+            })
+            .catch(function () {
+                // Ignore — no active generation
+            });
+    })();
 </script>
 {% endblock %}

@@ -19,7 +19,8 @@ def _load_prompt():
     with open(prompt_path) as f:
         content = f.read()
     # Extract the prompt part (everything before the placeholder)
-    parts = content.split("[PASTE CONTENTS OF runtime/data/github_data.json HERE]")
+    parts = content.split(
+        "[PASTE CONTENTS OF runtime/data/github_data.json HERE]")
     return parts[0].rstrip() if parts else content
 
 
@@ -147,7 +148,8 @@ def _call_ollama(prompt, data_json, config, on_stream=None):
 
     full_text = ""
     token_count = 0
-    response = requests.post(url + "/api/chat", json=payload, timeout=900, stream=True)
+    response = requests.post(
+        url + "/api/chat", json=payload, timeout=900, stream=True)
     response.raise_for_status()
     for line in response.iter_lines():
         if not line:
@@ -197,7 +199,7 @@ def _split_github_data(gh_data, batch_size):
     details = gh_data.get("top_repo_details", {})
     chunks = []
     for i in range(0, len(original_repos), batch_size):
-        batch_repos = original_repos[i : i + batch_size]
+        batch_repos = original_repos[i: i + batch_size]
         batch_names = [r.get("name", "") for r in batch_repos]
         batch_details = {k: v for k, v in details.items() if k in batch_names}
 
@@ -275,7 +277,8 @@ def _run_batch(idx, chunk, names, prompt, config, on_progress=None):
     batch_label = "batch {}".format(idx + 1)
     try:
         data_json = json.dumps(chunk, default=str)
-        review = _call_llm_with_retry(prompt, data_json, config, on_progress=on_progress)
+        review = _call_llm_with_retry(
+            prompt, data_json, config, on_progress=on_progress)
         return (idx, review, None)
     except Exception as e:
         return (idx, None, str(e))
@@ -317,6 +320,7 @@ def generate_review(github_data_path, config, on_progress=None):
     def make_stream_cb(label):
         if not is_ollama or not on_progress:
             return None
+
         def cb(tokens):
             on_progress("{}: {} tokens generated...".format(label, tokens))
         return cb
@@ -396,7 +400,8 @@ def generate_review(github_data_path, config, on_progress=None):
 
     if base_review is None:
         if failed_batches:
-            errors = "; ".join("batch {}: {}".format(b, err) for b, _, err in failed_batches)
+            errors = "; ".join("batch {}: {}".format(b, err)
+                               for b, _, err in failed_batches)
             raise ValueError("All LLM batches failed: {}".format(errors))
         raise ValueError("No batches were processed")
 
@@ -421,15 +426,18 @@ def _validate_review(review):
     if not isinstance(review, dict) or len(review) < 3:
         raise ValueError("LLM returned empty or trivial JSON")
     if review.get("overall_score", 0) == 0 and not review.get("repository_reviews"):
-        raise ValueError("LLM returned a review with no scores and no repository reviews")
+        raise ValueError(
+            "LLM returned a review with no scores and no repository reviews")
 
 
 def _build_chat_context(review, github_data=None):
     """Build a condensed system prompt from the review for chat context."""
     parts = []
     username = review.get("username", "unknown")
-    parts.append("You just reviewed the GitHub profile of @{}.".format(username))
-    parts.append("Overall score: {}/100.".format(review.get("overall_score", 0)))
+    parts.append(
+        "You just reviewed the GitHub profile of @{}.".format(username))
+    parts.append(
+        "Overall score: {}/100.".format(review.get("overall_score", 0)))
 
     headline = review.get("headline", "")
     if headline:
@@ -441,9 +449,11 @@ def _build_chat_context(review, github_data=None):
 
     pr = review.get("profile_review", {})
     if pr.get("strengths"):
-        parts.append("Profile strengths: {}".format(", ".join(pr["strengths"][:5])))
+        parts.append("Profile strengths: {}".format(
+            ", ".join(pr["strengths"][:5])))
     if pr.get("improvements"):
-        parts.append("Profile improvements needed: {}".format(", ".join(pr["improvements"][:5])))
+        parts.append("Profile improvements needed: {}".format(
+            ", ".join(pr["improvements"][:5])))
 
     readme_review = pr.get("profile_readme_review", "")
     if readme_review:
@@ -475,7 +485,8 @@ def _build_chat_context(review, github_data=None):
             parts.append("\nCurrent bio: \"{}\"".format(bio))
         readme = github_data.get("profile_readme", "")
         if readme:
-            parts.append("Current profile README (first 500 chars):\n{}".format(readme[:500]))
+            parts.append(
+                "Current profile README (first 500 chars):\n{}".format(readme[:500]))
 
     return "\n".join(parts)
 
@@ -577,7 +588,8 @@ def test_connection(config):
 
         elif provider == "ollama":
             import requests
-            url = config.get("ollama_url", "http://localhost:11434").rstrip("/")
+            url = config.get(
+                "ollama_url", "http://localhost:11434").rstrip("/")
             resp = requests.get(url + "/api/tags", timeout=5)
             resp.raise_for_status()
             models = [m["name"] for m in resp.json().get("models", [])]

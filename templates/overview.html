@@ -1,209 +1,240 @@
-    <!-- Hero -->
-    <header class="gradient-hero text-white">
-        <div class="max-w-6xl mx-auto px-6 py-16">
-            <div class="flex flex-col md:flex-row items-center gap-8">
-                <div class="relative">
-                    {{overall_ring}}
-                    <div class="absolute inset-0 flex flex-col items-center justify-center" style="transform: rotate(0deg)">
-                        <span class="text-4xl font-bold">{{overall_score}}</span>
-                        <span class="text-xs text-gray-300 uppercase tracking-wider">Overall</span>
-                    </div>
+<!-- Hero -->
+<header class="gradient-hero text-white">
+    <div class="max-w-6xl mx-auto px-6 py-16">
+        <div class="flex flex-col md:flex-row items-center gap-8">
+            <div class="relative">
+                {{overall_ring}}
+                <div class="absolute inset-0 flex flex-col items-center justify-center" style="transform: rotate(0deg)">
+                    <span class="text-4xl font-bold">{{overall_score}}</span>
+                    <span class="text-xs text-gray-300 uppercase tracking-wider">Overall</span>
                 </div>
-                <div class="text-center md:text-left">
-                    <h1 class="text-3xl md:text-4xl font-bold mb-2">{{display_name}}</h1>
-                    <div class="flex items-center justify-center md:justify-start gap-2 text-gray-300 mb-3">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        <span>@{{username}}</span>
-                    </div>
-                    <p class="text-lg text-gray-200 max-w-2xl">{{headline}}</p>
-                    <div class="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
-                        {{lang_tags}}
-                    </div>
+            </div>
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">{{display_name}}</h1>
+                <div class="flex items-center justify-center md:justify-start gap-2 text-gray-300 mb-3">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>@{{username}}</span>
+                </div>
+                <p class="text-lg text-gray-200 max-w-2xl">{{headline}}</p>
+                <div class="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
+                    {{lang_tags}}
                 </div>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
-    <main class="max-w-6xl mx-auto px-6 py-12 space-y-12">
+<main class="max-w-6xl mx-auto px-6 py-12 space-y-12">
 
-        {{fallback_banner}}
+    {{fallback_banner}}
 
-        <!-- Summary (first!) -->
-        <section class="section">
-            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 text-white">
-                <h2 class="text-2xl font-bold mb-4 flex items-center">Summary {{ai_indicator}}</h2>
-                <div class="space-y-4 text-gray-200 leading-relaxed">
-                    {{summary_html}}
+    <!-- Summary (first!) -->
+    <section class="section">
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 text-white">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">Summary {{ai_indicator}}</h2>
+            <div class="space-y-4 text-gray-200 leading-relaxed">
+                {{summary_html}}
+            </div>
+        </div>
+    </section>
+
+    <!-- Score Cards -->
+    <section class="section">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {{score_cards}}
+        </div>
+    </section>
+
+    <!-- Profile Review -->
+    <section class="section">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            Profile Review
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Completeness</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    {{completeness_html}}
                 </div>
             </div>
-        </section>
-
-        <!-- Score Cards -->
-        <section class="section">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {{score_cards}}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
+                {{profile_strengths}}
             </div>
-        </section>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
+                {{profile_improvements}}
+            </div>
+        </div>
+        {{profile_readme_section}}
+    </section>
 
-        <!-- Profile Review -->
-        <section class="section">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    <!-- Repository Presentation -->
+    <section class="section">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+            </div>
+            Repository Presentation
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Coverage</h3>
+                <div class="space-y-4">
+                    {{rp_stats}}
                 </div>
-                Profile Review
-            </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Completeness</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        {{completeness_html}}
-                    </div>
-                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
+                {{rp_strengths}}
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
+                {{rp_improvements}}
+            </div>
+        </div>
+        <!-- Link to full reviews -->
+        <div class="mt-6 text-center">
+            <a href="repos.html"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors font-medium text-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                View All {{repo_count}} Repository Reviews
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Project Highlights -->
+    <section class="section">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+            </div>
+            Project Highlights
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{highlights_html}}
+        </div>
+    </section>
+
+    <!-- Code Quality -->
+    <section class="section">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+            </div>
+            Code Quality
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Observations</h3>
+                {{code_observations}}
+            </div>
+            <div class="space-y-6">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
                     <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
-                    {{profile_strengths}}
+                    {{code_strengths}}
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
                     <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
-                    {{profile_improvements}}
+                    {{code_improvements}}
                 </div>
             </div>
-            {{profile_readme_section}}
-        </section>
+        </div>
+    </section>
 
-        <!-- Repository Presentation -->
-        <section class="section">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+    <!-- Activity Review -->
+    <section class="section">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            Activity Review
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Pattern</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{{activity_pattern}}</p>
+                <div class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700">
+                    <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Recent Focus</div>
+                    <p class="text-sm text-gray-700 dark:text-gray-200 font-medium">{{recent_focus}}</p>
                 </div>
-                Repository Presentation
-            </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Coverage</h3>
-                    <div class="space-y-4">
-                        {{rp_stats}}
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
-                    {{rp_strengths}}
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
-                    {{rp_improvements}}
+                <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700">
+                    <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Account Age</div>
+                    <p class="text-sm text-gray-700 dark:text-gray-200 font-medium">{{account_age}} years</p>
                 </div>
             </div>
-            <!-- Link to full reviews -->
-            <div class="mt-6 text-center">
-                <a href="repos.html" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors font-medium text-sm">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                    View All {{repo_count}} Repository Reviews
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                </a>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
+                {{activity_strengths}}
             </div>
-        </section>
-
-        <!-- Project Highlights -->
-        <section class="section">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                </div>
-                Project Highlights
-            </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {{highlights_html}}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
+                {{activity_improvements}}
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Code Quality -->
-        <section class="section">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                </div>
-                Code Quality
-            </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Observations</h3>
-                    {{code_observations}}
-                </div>
-                <div class="space-y-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
-                        {{code_strengths}}
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
-                        {{code_improvements}}
-                    </div>
-                </div>
+    <!-- Contribution Graph -->
+    {{contribution_graph_html}}
+
+    <!-- Categories -->
+    <section class="section">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
             </div>
-        </section>
+            Project Categories
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {{categories_html}}
+        </div>
+    </section>
 
-        <!-- Activity Review -->
-        <section class="section">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                </div>
-                Activity Review
-            </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Pattern</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{{activity_pattern}}</p>
-                    <div class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700">
-                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Recent Focus</div>
-                        <p class="text-sm text-gray-700 dark:text-gray-200 font-medium">{{recent_focus}}</p>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-gray-50 dark:border-gray-700">
-                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Account Age</div>
-                        <p class="text-sm text-gray-700 dark:text-gray-200 font-medium">{{account_age}} years</p>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Strengths</h3>
-                    {{activity_strengths}}
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Improvements</h3>
-                    {{activity_improvements}}
-                </div>
+    <!-- Recommendations -->
+    <section class="section">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
             </div>
-        </section>
+            Top Recommendations
+        </h2>
+        <div class="space-y-3">
+            {{recs_html}}
+        </div>
+    </section>
 
-        <!-- Contribution Graph -->
-        {{contribution_graph_html}}
-
-        <!-- Categories -->
-        <section class="section">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                </div>
-                Project Categories
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {{categories_html}}
-            </div>
-        </section>
-
-        <!-- Recommendations -->
-        <section class="section">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                </div>
-                Top Recommendations
-            </h2>
-            <div class="space-y-3">
-                {{recs_html}}
-            </div>
-        </section>
-
-    </main>
+</main>
