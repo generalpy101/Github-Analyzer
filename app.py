@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import signal
 import sys
 import time
 from datetime import datetime
@@ -204,6 +205,7 @@ def api_generate(username):
         "include_forked": request.args.get("include_forked") == "1",
         "include_archived": request.args.get("include_archived") == "1",
     }
+    config["_deep_review"] = request.args.get("deep_review") == "1"
 
     # Check if AI is configured; if not, flag it so pipeline skips LLM
     ai_configured = True
@@ -479,6 +481,28 @@ def serve_report_legacy_repos(username):
     return _report_404(message="No reviews found for this user.")
 
 
+@app.route("/api/shutdown", methods=["POST"])
+def api_shutdown():
+    """Gracefully shut down the server. Used by Tauri on window close."""
+    from server.generation_manager import shutdown_all
+    shutdown_all()
+    func = request.environ.get("werkzeug.server.shutdown")
+    if func:
+        func()
+    else:
+        os.kill(os.getpid(), signal.SIGTERM)
+    return jsonify({"ok": True})
+
+
+def _handle_exit(signum, frame):
+    """Clean up on SIGTERM/SIGINT."""
+    from server.generation_manager import shutdown_all
+    shutdown_all()
+    sys.exit(0)
+
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, _handle_exit)
+    signal.signal(signal.SIGINT, _handle_exit)
     print("GitHub Review — http://localhost:5959")
     app.run(host="127.0.0.1", port=5959, debug=False)

@@ -84,10 +84,11 @@ def compute_fallback_review(github_data: dict) -> dict:
     for repo in original_repos:
         name = repo.get("name", "")
         detail = details.get(name, {})
+        has_detail = bool(detail)
         score = 20  # base
 
         has_desc = bool(repo.get("description", "").strip())
-        has_readme = detail.get("has_readme", False)
+        has_readme = detail.get("has_readme", True) if has_detail else None
         has_license = bool(detail.get("license") or repo.get("licenseInfo"))
         raw_topics = repo.get("repositoryTopics") or detail.get("topics", [])
         if isinstance(raw_topics, dict):
@@ -96,7 +97,7 @@ def compute_fallback_review(github_data: dict) -> dict:
 
         if has_desc:
             score += 10
-        if has_readme:
+        if has_readme is True or has_readme is None:
             score += 15
         if has_license:
             score += 10
@@ -132,22 +133,33 @@ def compute_fallback_review(github_data: dict) -> dict:
             score += 5
         all_languages = list(langs.keys()) if isinstance(langs, dict) else []
 
-        # Infrastructure analysis from file tree
+        # Infrastructure analysis from file tree (None = unknown for repos without details)
         fta = detail.get("file_tree_analysis", {})
-        has_tests = fta.get("has_tests", False)
-        has_ci = fta.get("has_ci", False)
-        has_docker = fta.get("has_docker", False)
-        has_docs_dir = fta.get("has_docs", False)
-        if has_tests:
+        if has_detail:
+            has_tests = fta.get("has_tests", False)
+            has_ci = fta.get("has_ci", False)
+            has_docker = fta.get("has_docker", False)
+            has_docs_dir = fta.get("has_docs", False)
+        else:
+            has_tests = None
+            has_ci = None
+            has_docker = None
+            has_docs_dir = None
+        if has_tests is True:
             score += 10
-        if has_ci:
+        if has_ci is True:
             score += 10
-        if has_docker:
+        if has_docker is True:
             score += 5
-        if has_docs_dir:
+        if has_docs_dir is True:
             score += 5
 
-        infra_points = (has_tests * 35 + has_ci * 35 + has_docker * 15 + has_docs_dir * 15)
+        infra_points = (
+            (35 if has_tests is True else 0) +
+            (35 if has_ci is True else 0) +
+            (15 if has_docker is True else 0) +
+            (15 if has_docs_dir is True else 0)
+        )
         infrastructure_score = min(infra_points, 100)
 
         # PR stats
@@ -207,9 +219,9 @@ def compute_fallback_review(github_data: dict) -> dict:
         strengths = []
         improvements = []
         observations = []
-        if has_readme:
+        if has_readme is True:
             strengths.append("Has a README file")
-        else:
+        elif has_readme is False:
             improvements.append("Add a README explaining the project")
         if has_desc:
             strengths.append("Has a description")
@@ -223,17 +235,17 @@ def compute_fallback_review(github_data: dict) -> dict:
             strengths.append("Has topic tags for discoverability")
         else:
             improvements.append("Add topic tags for discoverability")
-        if has_tests:
+        if has_tests is True:
             strengths.append("Has test suite")
-        else:
+        elif has_tests is False:
             improvements.append("Add tests to improve reliability")
-        if has_ci:
+        if has_ci is True:
             strengths.append("Has CI/CD pipeline")
-        else:
+        elif has_ci is False:
             improvements.append("Add CI/CD for automated testing")
-        if has_docker:
+        if has_docker is True:
             strengths.append("Has Docker configuration")
-        if has_docs_dir:
+        if has_docs_dir is True:
             strengths.append("Has docs/contributing guidelines")
         if stars > 0:
             strengths.append("{} star{}".format(stars, "s" if stars != 1 else ""))
@@ -268,14 +280,14 @@ def compute_fallback_review(github_data: dict) -> dict:
             "score": score,
             "technical_complexity": complexity,
             "category": category,
-            "has_readme": has_readme,
+            "has_readme": bool(has_readme) if has_readme is not None else True,
             "has_license": has_license,
             "has_description": has_desc,
             "has_topics": has_topics,
-            "has_tests": has_tests,
-            "has_ci": has_ci,
-            "has_docker": has_docker,
-            "has_docs": has_docs_dir,
+            "has_tests": bool(has_tests) if has_tests is not None else False,
+            "has_ci": bool(has_ci) if has_ci is not None else False,
+            "has_docker": bool(has_docker) if has_docker is not None else False,
+            "has_docs": bool(has_docs_dir) if has_docs_dir is not None else False,
             "open_issues": open_issues,
             "last_activity": last_activity,
             "commit_quality": commit_quality,

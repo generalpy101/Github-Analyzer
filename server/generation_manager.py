@@ -29,6 +29,7 @@ _jobs_lock = threading.Lock()
 _active_lock = threading.Lock()  # Only one generation at a time
 _active_run_id = None
 _active_username = None
+_shutting_down = False
 
 
 def _emit(run_id, event_type, data):
@@ -39,7 +40,9 @@ def _emit(run_id, event_type, data):
 
 
 def _is_cancelled(run_id):
-    """Check if a job has been cancelled."""
+    """Check if a job has been cancelled or the server is shutting down."""
+    if _shutting_down:
+        return True
     with _jobs_lock:
         job = _jobs.get(run_id)
         return job is not None and job.get("cancelled", False)
@@ -192,8 +195,12 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
             def on_fetch_progress(msg):
                 _emit(run_id, "log", {"message": msg})
 
+            deep_review = config.get("_deep_review", False)
+            top_repos_count = 200 if deep_review else config.get("top_repos", 15)
+            if deep_review:
+                _emit(run_id, "log", {"message": "Deep review mode: fetching details for ALL repos."})
             _emit(run_id, "log", {"message": "Starting GitHub data fetch for @{}...".format(username)})
-            fetch_all(username, data_path, config.get("top_repos", 15),
+            fetch_all(username, data_path, top_repos_count,
                       on_progress=on_fetch_progress)
             _emit(run_id, "log", {"message": "GitHub data fetch complete."})
 
@@ -207,6 +214,30 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
         repo_filters = config.get("_repo_filters", {})
         gh_data = apply_repo_filters(gh_data, repo_filters)
         repo_count = gh_data.get("summary_stats", {}).get("total_repos", 0)
+
+        # Deep review: backfill details for repos that don't have them
+        deep_review = config.get("_deep_review", False)
+        if deep_review:
+            from server.fetch_github_data import fetch_repo_details
+            existing_details = gh_data.get("top_repo_details", {})
+            repos_needing_details = [
+                r for r in gh_data.get("repositories", [])
+                if not r.get("isEmpty", False) and r.get("name", "") not in existing_details
+            ]
+            if repos_needing_details:
+                _emit(run_id, "log", {
+                    "message": "Deep review: fetching details for {} additional repos...".format(len(repos_needing_details))
+                })
+                for i, repo in enumerate(repos_needing_details):
+                    if _is_cancelled(run_id):
+                        _finish_cancelled(run_id)
+                        return
+                    name = repo["name"]
+                    _emit(run_id, "log", {
+                        "message": "Fetching details for {} ({}/{})".format(name, i + 1, len(repos_needing_details))
+                    })
+                    existing_details[name] = fetch_repo_details(username, name)
+                gh_data["top_repo_details"] = existing_details
 
         _emit(run_id, "log", {"message": "Analyzing {} repositories.".format(repo_count)})
 
@@ -265,6 +296,11 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
 
         if not skip_llm:
             try:
+                deep_review = config.get("_deep_review", False)
+                if deep_review:
+                    config["batch_size"] = 2
+                    _emit(run_id, "log", {"message": "Deep review: using batch_size=2 for thorough per-repo analysis."})
+
                 _emit(run_id, "log", {
                     "message": "Sending {} repos to {} ({})...".format(
                         repo_count, config["provider"].title(), config.get("model", "default")
@@ -369,6 +405,22 @@ def _run_pipeline(run_id, username, use_cache, config, base_dir, templates_dir):
             _active_lock.release()
         except RuntimeError:
             pass  # Lock was already released
+
+
+def shutdown_all():
+    """Cancel all running jobs and mark them as error. Called on server shutdown."""
+    global _shutting_down, _active_run_id, _active_username
+    _shutting_down = True
+    with _jobs_lock:
+        for rid, job in _jobs.items():
+            if job["status"] == "running":
+                job["cancelled"] = True
+                try:
+                    update_run(rid, status="error")
+                except Exception:
+                    pass
+    _active_run_id = None
+    _active_username = None
 
 
 def _finish_cancelled(run_id):

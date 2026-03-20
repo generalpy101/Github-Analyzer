@@ -38,6 +38,13 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     Generate
                 </button>
+                <button type="button" id="deep-review-btn"
+                    class="px-5 py-3 bg-purple-700 text-white rounded-xl font-medium text-sm hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
+                    disabled title="Fetches details for ALL repos and reviews each one individually. Slower but much more accurate."
+                >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    Deep Review
+                </button>
             </div>
 
             <!-- Repo filters -->
@@ -233,6 +240,7 @@ function deleteRun(runId, btn) {
 (function() {
     var input = document.getElementById('username-input');
     var btn = document.getElementById('generate-btn');
+    var deepBtn = document.getElementById('deep-review-btn');
     var form = document.getElementById('generate-form');
     var progressSection = document.getElementById('progress-section');
     var progressSteps = document.getElementById('progress-steps');
@@ -296,7 +304,8 @@ function deleteRun(runId, btn) {
     var cancelBtnHtml = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Cancel';
 
     input.addEventListener('input', function() {
-        if (!isGenerating) btn.disabled = !input.value.trim();
+        var hasVal = !!input.value.trim();
+        if (!isGenerating) { btn.disabled = !hasVal; deepBtn.disabled = !hasVal; }
         cacheNotice.classList.add('hidden');
     });
 
@@ -346,7 +355,10 @@ function deleteRun(runId, btn) {
     function resetBtn() {
         isGenerating = false;
         activeRunId = null;
-        btn.disabled = !input.value.trim();
+        var hasVal = !!input.value.trim();
+        btn.disabled = !hasVal;
+        deepBtn.disabled = !hasVal;
+        deepBtn.classList.remove('hidden');
         btn.innerHTML = generateBtnDefault;
         btn.classList.remove('bg-red-600', 'hover:bg-red-500');
         btn.classList.add('bg-gray-800', 'hover:bg-gray-700');
@@ -372,6 +384,7 @@ function deleteRun(runId, btn) {
         btn.innerHTML = cancelBtnHtml;
         btn.classList.remove('bg-gray-800', 'hover:bg-gray-700');
         btn.classList.add('bg-red-600', 'hover:bg-red-500');
+        deepBtn.classList.add('hidden');
         cacheNotice.classList.add('hidden');
         progressSection.classList.remove('hidden');
         errorMsg.classList.add('hidden');
@@ -439,17 +452,23 @@ function deleteRun(runId, btn) {
         return params;
     }
 
+    var isDeepReview = false;
+
     function startGeneration(username, useCache) {
         clearLogs();
         showGeneratingUI(username);
-        renderSteps(1, 4, 'Starting...');
+        renderSteps(1, 4, isDeepReview ? 'Starting deep review...' : 'Starting...');
         if (!aiConfigured) {
             addLog('Warning: AI is not configured. Review will use algorithmic scoring only.');
+        }
+        if (isDeepReview) {
+            addLog('Deep review mode: fetching details for ALL repos, reviewing each individually.');
         }
         addLog('Requesting generation for @' + username + (useCache ? ' (using cache)' : '') + '...');
 
         var params = getFilterParams();
         if (useCache) params.push('use_cache=1');
+        if (isDeepReview) params.push('deep_review=1');
         var url = '/api/generate/' + encodeURIComponent(username);
         if (params.length) url += '?' + params.join('&');
 
@@ -492,11 +511,38 @@ function deleteRun(runId, btn) {
             cancelGeneration();
             return false;
         }
+        isDeepReview = false;
+    });
+
+    deepBtn.addEventListener('click', function() {
+        if (isGenerating) return;
+        var username = extractUsername(input.value);
+        if (!username) {
+            errorMsg.classList.remove('hidden');
+            errorText.textContent = 'Invalid GitHub username or URL.';
+            return;
+        }
+        isDeepReview = true;
+        pendingUsername = username;
+        errorMsg.classList.add('hidden');
+
+        fetch('/api/check-cache/' + encodeURIComponent(username))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.cached) {
+                    cacheDate.textContent = data.fetched_at;
+                    cacheNotice.classList.remove('hidden');
+                } else {
+                    startGeneration(username, false);
+                }
+            })
+            .catch(function() { startGeneration(username, false); });
     });
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         if (isGenerating) { cancelGeneration(); return; }
+        isDeepReview = false;
         var username = extractUsername(input.value);
         if (!username) {
             errorMsg.classList.remove('hidden');

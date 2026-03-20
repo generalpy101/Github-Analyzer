@@ -137,6 +137,16 @@ fn main() {
         .manage(ServerProcess(Mutex::new(server)))
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::Destroyed = event {
+                // Ask the server to shut down gracefully first
+                let _ = reqwest::blocking::Client::builder()
+                    .timeout(Duration::from_secs(2))
+                    .build()
+                    .and_then(|c| {
+                        c.post(format!("{}/api/shutdown", SERVER_URL))
+                            .send()
+                            .map_err(|e| e.into())
+                    });
+
                 let state = window.app_handle().state::<ServerProcess>();
                 let mut guard = match state.0.lock() {
                     Ok(g) => g,

@@ -9,6 +9,9 @@
     <script>if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         :root { --hero-from: #0f172a; --hero-mid: #1e293b; --hero-to: #334155; }
@@ -132,16 +135,36 @@
     </div>
     <div id="chat-overlay" class="fixed inset-0 bg-black/20 z-[55] hidden no-print"></div>
     <style>
-        .chat-md h1,.chat-md h2,.chat-md h3{font-weight:700;margin:0.75em 0 0.25em;}
-        .chat-md h1{font-size:1.25em;} .chat-md h2{font-size:1.1em;} .chat-md h3{font-size:1em;}
-        .chat-md p{margin:0.5em 0;}
+        .chat-md h1,.chat-md h2,.chat-md h3,.chat-md h4{font-weight:700;margin:0.75em 0 0.25em;line-height:1.3;}
+        .chat-md h1{font-size:1.3em;border-bottom:1px solid rgba(128,128,128,0.2);padding-bottom:0.2em;}
+        .chat-md h2{font-size:1.15em;} .chat-md h3{font-size:1.05em;} .chat-md h4{font-size:1em;}
+        .chat-md p{margin:0.5em 0;line-height:1.6;}
         .chat-md ul,.chat-md ol{margin:0.5em 0;padding-left:1.5em;}
-        .chat-md li{margin:0.2em 0;}
-        .chat-md pre{margin:0.5em 0;padding:0.75em;border-radius:0.5em;overflow-x:auto;font-size:0.8em;line-height:1.5;}
-        .chat-md pre code{padding:0;background:none;border-radius:0;font-size:inherit;}
-        .chat-md code{padding:0.125em 0.375em;border-radius:0.25em;font-size:0.85em;}
-        .chat-md a{text-decoration:underline;}
-        .chat-md blockquote{border-left:3px solid;padding-left:0.75em;margin:0.5em 0;opacity:0.8;}
+        .chat-md ul{list-style-type:disc;} .chat-md ol{list-style-type:decimal;}
+        .chat-md li{margin:0.25em 0;line-height:1.5;}
+        .chat-md li>ul,.chat-md li>ol{margin:0.15em 0;}
+        .chat-md pre{margin:0.75em 0;padding:0.75em 1em;border-radius:0.5em;overflow-x:auto;font-size:0.82em;line-height:1.5;position:relative;}
+        .chat-md pre code{padding:0;background:none;border-radius:0;font-size:inherit;color:inherit;}
+        .chat-md code{padding:0.15em 0.4em;border-radius:0.25em;font-size:0.85em;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;}
+        .chat-md a{color:#3b82f6;text-decoration:underline;text-underline-offset:2px;}
+        .chat-md a:hover{color:#2563eb;}
+        .chat-md blockquote{border-left:3px solid rgba(128,128,128,0.4);padding:0.25em 0 0.25em 0.75em;margin:0.5em 0;color:rgba(128,128,128,0.8);}
+        .chat-md blockquote p{margin:0.25em 0;}
+        .chat-md hr{border:none;border-top:1px solid rgba(128,128,128,0.2);margin:1em 0;}
+        .chat-md table{border-collapse:collapse;margin:0.5em 0;width:100%;font-size:0.85em;}
+        .chat-md th,.chat-md td{border:1px solid rgba(128,128,128,0.25);padding:0.4em 0.6em;text-align:left;}
+        .chat-md th{font-weight:600;}
+        .chat-md input[type="checkbox"]{margin-right:0.4em;pointer-events:none;}
+        .chat-md img{max-width:100%;border-radius:0.375em;}
+        .chat-md strong{font-weight:700;} .chat-md em{font-style:italic;}
+        .chat-md del{text-decoration:line-through;opacity:0.7;}
+        .chat-md p:first-child{margin-top:0;} .chat-md p:last-child{margin-bottom:0;}
+
+        .dark .chat-md code{background:rgba(255,255,255,0.1);color:#e5e7eb;}
+        .chat-md code{background:rgba(0,0,0,0.06);}
+        .dark .chat-md pre{background:#1e293b;} .chat-md pre{background:#1e293b;}
+        .dark .chat-md th,.dark .chat-md td{border-color:rgba(255,255,255,0.1);}
+        .dark .chat-md a{color:#60a5fa;}
     </style>
 
     <footer class="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
@@ -179,80 +202,29 @@
         var MIN_WIDTH = 320;
         var MAX_WIDTH_RATIO = 0.9;
 
-        function esc(t) {
-            return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        // Configure marked.js for full markdown support with syntax highlighting
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                highlight: function(code, lang) {
+                    if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                        try { return hljs.highlight(code, {language: lang}).value; } catch(e) {}
+                    }
+                    if (typeof hljs !== 'undefined') {
+                        try { return hljs.highlightAuto(code).value; } catch(e) {}
+                    }
+                    return code;
+                }
+            });
         }
 
-        function mdToHtml(text) {
+        function renderMd(text) {
             if (!text) return '';
-            var safe = esc(text);
-
-            // Fenced code blocks: ```lang\n...\n```
-            safe = safe.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
-                return '<pre class="bg-gray-800 dark:bg-gray-900 text-gray-100 rounded-lg"><code>' + code.trim() + '</code></pre>';
-            });
-            // Inline code
-            safe = safe.replace(/`([^`]+?)`/g, '<code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 rounded text-xs font-mono">$1</code>');
-
-            // Process line by line for block elements
-            var lines = safe.split('\n');
-            var html = '';
-            var inList = false;
-            var listType = '';
-
-            for (var i = 0; i < lines.length; i++) {
-                var line = lines[i];
-
-                // Skip lines inside <pre> blocks
-                if (line.indexOf('<pre') >= 0) {
-                    var preEnd = safe.indexOf('</pre>', safe.indexOf(line));
-                    html += safe.substring(safe.indexOf(line), preEnd + 6);
-                    // Jump to the line after </pre>
-                    var remaining = safe.substring(preEnd + 6);
-                    lines = remaining.split('\n');
-                    i = -1;
-                    safe = remaining;
-                    continue;
-                }
-
-                // Headings
-                if (/^### /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<h3>' + line.substring(4) + '</h3>'; continue; }
-                if (/^## /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<h2>' + line.substring(3) + '</h2>'; continue; }
-                if (/^# /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<h1>' + line.substring(2) + '</h1>'; continue; }
-
-                // Blockquote
-                if (/^&gt; /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<blockquote>' + line.substring(5) + '</blockquote>'; continue; }
-
-                // Unordered list
-                if (/^[-*] /.test(line)) {
-                    if (!inList || listType !== 'ul') { if (inList) html += '</' + listType + '>'; html += '<ul>'; inList = true; listType = 'ul'; }
-                    html += '<li>' + line.substring(2) + '</li>';
-                    continue;
-                }
-                // Ordered list
-                if (/^\d+\. /.test(line)) {
-                    if (!inList || listType !== 'ol') { if (inList) html += '</' + listType + '>'; html += '<ol>'; inList = true; listType = 'ol'; }
-                    html += '<li>' + line.replace(/^\d+\. /, '') + '</li>';
-                    continue;
-                }
-
-                // Close list if we hit a non-list line
-                if (inList) { html += '</' + listType + '>'; inList = false; }
-
-                // Empty line
-                if (line.trim() === '') { continue; }
-
-                // Regular paragraph
-                html += '<p>' + line + '</p>';
+            if (typeof marked !== 'undefined') {
+                try { return marked.parse(text); } catch(e) {}
             }
-            if (inList) html += '</' + listType + '>';
-
-            // Inline formatting
-            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-            html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
-            html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 hover:underline">$1</a>');
-
-            return html;
+            return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
         }
 
         function appendMessage(role, content) {
@@ -262,10 +234,16 @@
             var bubble = document.createElement('div');
             if (role === 'user') {
                 bubble.className = 'max-w-[85%] px-3 py-2 bg-blue-600 text-white rounded-xl rounded-br-sm text-sm';
-                bubble.innerHTML = esc(content).replace(/\n/g, '<br>');
+                bubble.innerHTML = content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
             } else {
-                bubble.className = 'max-w-[85%] px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-xl rounded-bl-sm text-sm leading-relaxed chat-md';
-                bubble.innerHTML = mdToHtml(content);
+                bubble.className = 'max-w-[90%] px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-xl rounded-bl-sm text-sm leading-relaxed chat-md';
+                bubble.innerHTML = renderMd(content);
+                // Apply syntax highlighting to code blocks that marked may have missed
+                if (typeof hljs !== 'undefined') {
+                    bubble.querySelectorAll('pre code').forEach(function(block) {
+                        if (!block.classList.contains('hljs')) hljs.highlightElement(block);
+                    });
+                }
             }
             div.appendChild(bubble);
             messagesEl.appendChild(div);
