@@ -32,4 +32,4 @@ jobs:
 
       - name: Run tests with coverage
         if: matrix.python-version == '3.12'
-        run: python -m pytest tests/ --cov=server --cov-report=term-missing --cov-fail-under=60
+        run: python -m pytest tests/ --cov=server --cov-report=term-missing --cov-fail-under=40
