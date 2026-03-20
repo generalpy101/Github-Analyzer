@@ -22,10 +22,10 @@ from flask import Flask, Response, render_template, request, jsonify
 from server.config import load_config, save_config, get_redacted_config
 from server.db import (
     init_db, get_run, get_latest_run, get_run_history, cancel_stale_runs,
-    delete_run, mark_run_error,
+    delete_run, mark_run_error, get_chat_messages, add_chat_message,
 )
 from server.generate_report import render_overview, render_repos, render_repo_detail
-from server.llm_client import test_connection as _test_llm_connection
+from server.llm_client import test_connection as _test_llm_connection, chat_with_review
 from server.generation_manager import (
     start_generation, cancel_generation, get_progress, get_job, get_active_job,
     cleanup_old_jobs,
@@ -315,6 +315,58 @@ def api_history():
     return jsonify(get_history())
 
 
+# --- Chat API ---
+
+@app.route("/api/chat/<int:run_id>", methods=["GET"])
+def api_chat_history(run_id):
+    """Get chat history for a run."""
+    run = get_run(run_id)
+    if not run:
+        return jsonify({"error": "Run not found"}), 404
+    messages = get_chat_messages(run_id)
+    return jsonify({"messages": messages})
+
+
+@app.route("/api/chat/<int:run_id>", methods=["POST"])
+def api_chat_send(run_id):
+    """Send a chat message and get an AI response."""
+    run = get_run(run_id)
+    if not run:
+        return jsonify({"error": "Run not found"}), 404
+    if not run.get("review_json"):
+        return jsonify({"error": "No review data for this run"}), 400
+
+    data = request.get_json()
+    if not data or not data.get("message", "").strip():
+        return jsonify({"error": "No message provided"}), 400
+
+    config = load_config()
+    ai_configured = True
+    if config["provider"] != "ollama" and not config.get("api_key"):
+        ai_configured = False
+    if not ai_configured:
+        return jsonify({"error": "AI is not configured. Go to Settings to set up your LLM provider."}), 400
+
+    user_message = data["message"].strip()
+    review = json.loads(run["review_json"])
+    github_data = json.loads(run["github_data_json"]) if run.get("github_data_json") else {}
+
+    add_chat_message(run_id, "user", user_message)
+
+    existing = get_chat_messages(run_id)
+    history = [{"role": m["role"], "content": m["content"]} for m in existing]
+
+    try:
+        response_text = chat_with_review(review, github_data, history, config)
+    except Exception as e:
+        response_text = "Sorry, I encountered an error: {}".format(str(e))
+
+    add_chat_message(run_id, "assistant", response_text)
+
+    all_messages = get_chat_messages(run_id)
+    return jsonify({"response": response_text, "messages": all_messages})
+
+
 # --- Dynamic report rendering from DB ---
 
 def _inject_detail_urls(review, run_id):
@@ -358,7 +410,8 @@ def serve_report_repos(run_id):
     nav_overview = "/report/{}/".format(run_id)
     nav_repos = "/report/{}/repos.html".format(run_id)
     return render_repos(review, TEMPLATES_DIR, back_url="/",
-                        nav_overview_url=nav_overview, nav_repos_url=nav_repos)
+                        nav_overview_url=nav_overview, nav_repos_url=nav_repos,
+                        run_id=run_id)
 
 
 @app.route("/report/<int:run_id>/repo/<repo_name>")

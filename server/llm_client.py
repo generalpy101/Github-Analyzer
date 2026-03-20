@@ -424,6 +424,132 @@ def _validate_review(review):
         raise ValueError("LLM returned a review with no scores and no repository reviews")
 
 
+def _build_chat_context(review, github_data=None):
+    """Build a condensed system prompt from the review for chat context."""
+    parts = []
+    username = review.get("username", "unknown")
+    parts.append("You just reviewed the GitHub profile of @{}.".format(username))
+    parts.append("Overall score: {}/100.".format(review.get("overall_score", 0)))
+
+    headline = review.get("headline", "")
+    if headline:
+        parts.append("Headline: {}".format(headline))
+
+    summary = review.get("summary", "")
+    if summary:
+        parts.append("Summary:\n{}".format(summary[:1500]))
+
+    pr = review.get("profile_review", {})
+    if pr.get("strengths"):
+        parts.append("Profile strengths: {}".format(", ".join(pr["strengths"][:5])))
+    if pr.get("improvements"):
+        parts.append("Profile improvements needed: {}".format(", ".join(pr["improvements"][:5])))
+
+    readme_review = pr.get("profile_readme_review", "")
+    if readme_review:
+        parts.append("Profile README review: {}".format(readme_review[:500]))
+
+    repos = review.get("repository_reviews", [])
+    if repos:
+        parts.append("\nRepository reviews ({} repos):".format(len(repos)))
+        for r in repos[:20]:
+            line = "- {} (score: {}, rec: {}): {}".format(
+                r.get("repo_name", "?"), r.get("score", 0),
+                r.get("recommendation", "?"), r.get("verdict", "")[:150],
+            )
+            parts.append(line)
+
+    recs = review.get("top_recommendations", [])
+    if recs:
+        parts.append("\nTop recommendations:")
+        for rec in recs[:5]:
+            parts.append("- [{}] {}: {}".format(
+                rec.get("priority", "?"), rec.get("title", ""),
+                rec.get("description", "")[:200],
+            ))
+
+    if github_data:
+        profile = github_data.get("profile", {})
+        bio = profile.get("bio", "")
+        if bio:
+            parts.append("\nCurrent bio: \"{}\"".format(bio))
+        readme = github_data.get("profile_readme", "")
+        if readme:
+            parts.append("Current profile README (first 500 chars):\n{}".format(readme[:500]))
+
+    return "\n".join(parts)
+
+
+def chat_with_review(review, github_data, messages, config):
+    """Send a chat message with the review as context.
+
+    Args:
+        review: The review dict (from review_json)
+        github_data: The github_data dict (for profile/README context)
+        messages: List of {role, content} dicts (chat history)
+        config: LLM config dict
+
+    Returns:
+        The assistant's response as a plain text string
+    """
+    context = _build_chat_context(review, github_data)
+    system_msg = (
+        "You are a helpful GitHub profile coach. You have just completed a detailed "
+        "review of a developer's GitHub profile. Use the review data below to answer "
+        "their questions with specific, actionable advice.\n\n"
+        "When suggesting improvements, be concrete — write actual text they can copy, "
+        "name specific repos, and reference their real data. Use markdown formatting "
+        "(**bold**, `code`, bullet lists) to make your responses clear.\n\n"
+        "Review context:\n" + context
+    )
+
+    provider = config.get("provider", "anthropic")
+
+    if provider == "anthropic":
+        import anthropic
+        client = anthropic.Anthropic(api_key=config["api_key"])
+        resp = client.messages.create(
+            model=config.get("model", "claude-sonnet-4-20250514"),
+            max_tokens=4000,
+            system=system_msg,
+            messages=messages,
+        )
+        for block in resp.content:
+            if block.type == "text":
+                return block.text
+        return resp.content[0].text
+
+    elif provider == "openai":
+        import openai
+        client = openai.OpenAI(api_key=config["api_key"])
+        all_msgs = [{"role": "system", "content": system_msg}] + messages
+        resp = client.chat.completions.create(
+            model=config.get("model", "gpt-4o"),
+            max_tokens=4000,
+            messages=all_msgs,
+        )
+        return resp.choices[0].message.content
+
+    elif provider == "ollama":
+        import requests
+        url = config.get("ollama_url", "http://localhost:11434").rstrip("/")
+        all_msgs = [{"role": "system", "content": system_msg}] + messages
+        resp = requests.post(
+            url + "/api/chat",
+            json={
+                "model": config.get("model", "llama3.1"),
+                "messages": all_msgs,
+                "stream": False,
+                "options": {"num_ctx": 16384},
+            },
+            timeout=300,
+        )
+        resp.raise_for_status()
+        return resp.json()["message"]["content"]
+
+    raise ValueError("Unknown provider: {}".format(provider))
+
+
 def test_connection(config):
     """Test that the LLM connection works. Returns (success, message)."""
     provider = config.get("provider", "anthropic")

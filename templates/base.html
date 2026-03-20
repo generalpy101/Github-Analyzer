@@ -75,6 +75,7 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     PDF
                 </button>
+                {{chat_button}}
                 <button id="theme-toggle" class="no-print p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" title="Toggle dark mode">
                     <svg class="w-4 h-4 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     <svg class="w-4 h-4 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -84,6 +85,64 @@
     </nav>
 
     {{content}}
+
+    <!-- Chat Panel -->
+    <div id="chat-panel" class="fixed right-0 top-0 h-full bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-2xl z-[60] translate-x-full transition-transform duration-300 flex flex-col no-print" style="width:400px;">
+        <!-- Drag handle for resizing -->
+        <div id="chat-resize" class="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-500/30 active:bg-blue-500/50 transition-colors z-10"></div>
+
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                <span class="font-semibold text-gray-800 dark:text-gray-100 text-sm">Chat about this review</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <button id="chat-fullscreen" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" title="Toggle fullscreen">
+                    <svg id="chat-expand-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                    <svg id="chat-shrink-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
+                </button>
+                <button id="chat-close" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            <div id="chat-suggestions" class="space-y-2">
+                <p class="text-xs text-gray-400 mb-2">Quick questions:</p>
+                <button class="chat-suggest w-full text-left px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">How can I improve my GitHub bio?</button>
+                <button class="chat-suggest w-full text-left px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">What repos should I pin to my profile?</button>
+                <button class="chat-suggest w-full text-left px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">Write me a better profile README</button>
+                <button class="chat-suggest w-full text-left px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">Which repos should I archive?</button>
+                <button class="chat-suggest w-full text-left px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">How can I improve my top project?</button>
+            </div>
+        </div>
+
+        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+            <form id="chat-form" class="flex gap-2">
+                <input type="text" id="chat-input" placeholder="Ask about the review..."
+                    class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autocomplete="off" />
+                <button type="submit" id="chat-send"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition-colors disabled:opacity-50 shrink-0">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+    <div id="chat-overlay" class="fixed inset-0 bg-black/20 z-[55] hidden no-print"></div>
+    <style>
+        .chat-md h1,.chat-md h2,.chat-md h3{font-weight:700;margin:0.75em 0 0.25em;}
+        .chat-md h1{font-size:1.25em;} .chat-md h2{font-size:1.1em;} .chat-md h3{font-size:1em;}
+        .chat-md p{margin:0.5em 0;}
+        .chat-md ul,.chat-md ol{margin:0.5em 0;padding-left:1.5em;}
+        .chat-md li{margin:0.2em 0;}
+        .chat-md pre{margin:0.5em 0;padding:0.75em;border-radius:0.5em;overflow-x:auto;font-size:0.8em;line-height:1.5;}
+        .chat-md pre code{padding:0;background:none;border-radius:0;font-size:inherit;}
+        .chat-md code{padding:0.125em 0.375em;border-radius:0.25em;font-size:0.85em;}
+        .chat-md a{text-decoration:underline;}
+        .chat-md blockquote{border-left:3px solid;padding-left:0.75em;margin:0.5em 0;opacity:0.8;}
+    </style>
 
     <footer class="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
         Generated by GitHub Profile Reviewer &middot; {{review_date}}
@@ -95,6 +154,254 @@
         document.documentElement.classList.toggle('dark');
         localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
+
+    (function() {
+        var runId = '{{run_id}}';
+        var toggle = document.getElementById('chat-toggle');
+        var panel = document.getElementById('chat-panel');
+        var overlay = document.getElementById('chat-overlay');
+        var closeBtn = document.getElementById('chat-close');
+        var fsBtn = document.getElementById('chat-fullscreen');
+        var expandIcon = document.getElementById('chat-expand-icon');
+        var shrinkIcon = document.getElementById('chat-shrink-icon');
+        var resizeHandle = document.getElementById('chat-resize');
+        var form = document.getElementById('chat-form');
+        var input = document.getElementById('chat-input');
+        var sendBtn = document.getElementById('chat-send');
+        var messagesEl = document.getElementById('chat-messages');
+        var suggestions = document.getElementById('chat-suggestions');
+        if (!toggle || !runId || !panel) return;
+
+        var isOpen = false;
+        var isFullscreen = false;
+        var loaded = false;
+        var panelWidth = 400;
+        var MIN_WIDTH = 320;
+        var MAX_WIDTH_RATIO = 0.9;
+
+        function esc(t) {
+            return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function mdToHtml(text) {
+            if (!text) return '';
+            var safe = esc(text);
+
+            // Fenced code blocks: ```lang\n...\n```
+            safe = safe.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+                return '<pre class="bg-gray-800 dark:bg-gray-900 text-gray-100 rounded-lg"><code>' + code.trim() + '</code></pre>';
+            });
+            // Inline code
+            safe = safe.replace(/`([^`]+?)`/g, '<code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100 rounded text-xs font-mono">$1</code>');
+
+            // Process line by line for block elements
+            var lines = safe.split('\n');
+            var html = '';
+            var inList = false;
+            var listType = '';
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+
+                // Skip lines inside <pre> blocks
+                if (line.indexOf('<pre') >= 0) {
+                    var preEnd = safe.indexOf('</pre>', safe.indexOf(line));
+                    html += safe.substring(safe.indexOf(line), preEnd + 6);
+                    // Jump to the line after </pre>
+                    var remaining = safe.substring(preEnd + 6);
+                    lines = remaining.split('\n');
+                    i = -1;
+                    safe = remaining;
+                    continue;
+                }
+
+                // Headings
+                if (/^### /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<h3>' + line.substring(4) + '</h3>'; continue; }
+                if (/^## /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<h2>' + line.substring(3) + '</h2>'; continue; }
+                if (/^# /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<h1>' + line.substring(2) + '</h1>'; continue; }
+
+                // Blockquote
+                if (/^&gt; /.test(line)) { if (inList) { html += '</' + listType + '>'; inList = false; } html += '<blockquote>' + line.substring(5) + '</blockquote>'; continue; }
+
+                // Unordered list
+                if (/^[-*] /.test(line)) {
+                    if (!inList || listType !== 'ul') { if (inList) html += '</' + listType + '>'; html += '<ul>'; inList = true; listType = 'ul'; }
+                    html += '<li>' + line.substring(2) + '</li>';
+                    continue;
+                }
+                // Ordered list
+                if (/^\d+\. /.test(line)) {
+                    if (!inList || listType !== 'ol') { if (inList) html += '</' + listType + '>'; html += '<ol>'; inList = true; listType = 'ol'; }
+                    html += '<li>' + line.replace(/^\d+\. /, '') + '</li>';
+                    continue;
+                }
+
+                // Close list if we hit a non-list line
+                if (inList) { html += '</' + listType + '>'; inList = false; }
+
+                // Empty line
+                if (line.trim() === '') { continue; }
+
+                // Regular paragraph
+                html += '<p>' + line + '</p>';
+            }
+            if (inList) html += '</' + listType + '>';
+
+            // Inline formatting
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+            html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 hover:underline">$1</a>');
+
+            return html;
+        }
+
+        function appendMessage(role, content) {
+            if (suggestions) suggestions.style.display = 'none';
+            var div = document.createElement('div');
+            div.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
+            var bubble = document.createElement('div');
+            if (role === 'user') {
+                bubble.className = 'max-w-[85%] px-3 py-2 bg-blue-600 text-white rounded-xl rounded-br-sm text-sm';
+                bubble.innerHTML = esc(content).replace(/\n/g, '<br>');
+            } else {
+                bubble.className = 'max-w-[85%] px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-xl rounded-bl-sm text-sm leading-relaxed chat-md';
+                bubble.innerHTML = mdToHtml(content);
+            }
+            div.appendChild(bubble);
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function loadHistory() {
+            fetch('/api/chat/' + runId)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.messages && data.messages.length > 0) {
+                        if (suggestions) suggestions.style.display = 'none';
+                        data.messages.forEach(function(m) { appendMessage(m.role, m.content); });
+                    }
+                    loaded = true;
+                })
+                .catch(function() { loaded = true; });
+        }
+
+        function setPanelWidth(w) {
+            panelWidth = Math.max(MIN_WIDTH, Math.min(w, window.innerWidth * MAX_WIDTH_RATIO));
+            if (!isFullscreen) panel.style.width = panelWidth + 'px';
+        }
+
+        function openPanel() {
+            isOpen = true;
+            panel.style.transform = 'translateX(0)';
+            overlay.classList.remove('hidden');
+            if (!loaded) loadHistory();
+            setTimeout(function() { input.focus(); }, 300);
+        }
+
+        function closePanel() {
+            isOpen = false;
+            isFullscreen = false;
+            panel.style.transform = 'translateX(100%)';
+            panel.style.width = panelWidth + 'px';
+            expandIcon.classList.remove('hidden'); shrinkIcon.classList.add('hidden');
+            overlay.classList.add('hidden');
+        }
+
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+            if (isFullscreen) {
+                panel.style.width = '100vw';
+                expandIcon.classList.add('hidden'); shrinkIcon.classList.remove('hidden');
+            } else {
+                panel.style.width = panelWidth + 'px';
+                expandIcon.classList.remove('hidden'); shrinkIcon.classList.add('hidden');
+            }
+        }
+
+        // Resize by dragging
+        var isDragging = false;
+        resizeHandle.addEventListener('mousedown', function(e) {
+            if (isFullscreen) return;
+            isDragging = true;
+            panel.style.transition = 'none';
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            setPanelWidth(window.innerWidth - e.clientX);
+        });
+        document.addEventListener('mouseup', function() {
+            if (!isDragging) return;
+            isDragging = false;
+            panel.style.transition = '';
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        });
+
+        toggle.addEventListener('click', function() { isOpen ? closePanel() : openPanel(); });
+        closeBtn.addEventListener('click', closePanel);
+        overlay.addEventListener('click', closePanel);
+        fsBtn.addEventListener('click', toggleFullscreen);
+
+        function sendMessage(text) {
+            if (!text.trim()) return;
+            appendMessage('user', text);
+            input.value = '';
+            sendBtn.disabled = true;
+            sendBtn.textContent = '...';
+
+            var loading = document.createElement('div');
+            loading.className = 'flex justify-start';
+            loading.id = 'chat-loading';
+            loading.innerHTML = '<div class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl rounded-bl-sm text-sm text-gray-400"><span class="inline-block w-2 h-2 bg-gray-400 rounded-full animate-pulse mr-1"></span><span class="inline-block w-2 h-2 bg-gray-400 rounded-full animate-pulse mr-1" style="animation-delay:0.2s"></span><span class="inline-block w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay:0.4s"></span></div>';
+            messagesEl.appendChild(loading);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+
+            fetch('/api/chat/' + runId, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: text})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var el = document.getElementById('chat-loading');
+                if (el) el.remove();
+                if (data.error) {
+                    appendMessage('assistant', 'Error: ' + data.error);
+                } else {
+                    appendMessage('assistant', data.response);
+                }
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            })
+            .catch(function(err) {
+                var el = document.getElementById('chat-loading');
+                if (el) el.remove();
+                appendMessage('assistant', 'Connection error: ' + err.message);
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            sendMessage(input.value);
+        });
+
+        document.querySelectorAll('.chat-suggest').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                openPanel();
+                sendMessage(btn.textContent);
+            });
+        });
+
+        // Keyboard shortcut: Escape to close
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) closePanel();
+        });
+    })();
     </script>
 </body>
 </html>

@@ -45,6 +45,16 @@ def init_db():
         );
         CREATE INDEX IF NOT EXISTS idx_runs_username ON runs(username);
         CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at);
+
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id INTEGER NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (run_id) REFERENCES runs(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_run_id ON chat_messages(run_id);
     """)
     conn.close()
 
@@ -155,6 +165,39 @@ def mark_run_error(run_id):
         "UPDATE runs SET status = 'error' WHERE id = ? AND status = 'pending'",
         (run_id,),
     )
+    conn.commit()
+    conn.close()
+
+
+def get_chat_messages(run_id):
+    """Fetch all chat messages for a run, ordered chronologically."""
+    conn = _get_conn()
+    rows = conn.execute(
+        "SELECT role, content, created_at FROM chat_messages "
+        "WHERE run_id = ? ORDER BY id ASC",
+        (run_id,),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def add_chat_message(run_id, role, content):
+    """Insert a chat message and return its ID."""
+    conn = _get_conn()
+    cur = conn.execute(
+        "INSERT INTO chat_messages (run_id, role, content) VALUES (?, ?, ?)",
+        (run_id, role, content),
+    )
+    msg_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return msg_id
+
+
+def delete_chat_messages(run_id):
+    """Delete all chat messages for a run."""
+    conn = _get_conn()
+    conn.execute("DELETE FROM chat_messages WHERE run_id = ?", (run_id,))
     conn.commit()
     conn.close()
 

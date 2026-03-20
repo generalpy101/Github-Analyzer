@@ -839,6 +839,17 @@ def render_repo_detail(review, repo_name, github_data, templates_dir,
         "review_date": v["review_date"],
         "extra_css": "",
         "content": content,
+        "run_id": str(run_id) if run_id else "",
+        "chat_button": (
+            '<button id="chat-toggle" class="no-print px-3 py-1.5 rounded-lg text-sm font-medium '
+            'text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 '
+            'dark:hover:bg-gray-700 flex items-center gap-1.5" title="Chat about this review">'
+            '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">'
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" '
+            'd="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 '
+            '01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>'
+            '</svg>Chat</button>'
+        ) if run_id else "",
     }
     return render_template(os.path.join(templates_dir, "base.html"), base_vars)
 
@@ -1102,7 +1113,7 @@ def _build_repos_html(review, templates_dir):
 
 
 def _wrap_base(content, v, templates_dir, page="overview", extra_css="", back_url="/",
-                nav_overview_url="index.html", nav_repos_url="repos.html"):
+                nav_overview_url="index.html", nav_repos_url="repos.html", run_id=None):
     """Wrap page content in the base template."""
     is_overview = (page == "overview")
     base_vars = {
@@ -1118,6 +1129,17 @@ def _wrap_base(content, v, templates_dir, page="overview", extra_css="", back_ur
         "review_date": v["review_date"],
         "extra_css": extra_css,
         "content": content,
+        "run_id": str(run_id) if run_id else "",
+        "chat_button": (
+            '<button id="chat-toggle" class="no-print px-3 py-1.5 rounded-lg text-sm font-medium '
+            'text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 '
+            'dark:hover:bg-gray-700 flex items-center gap-1.5" title="Chat about this review">'
+            '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">'
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" '
+            'd="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 '
+            '01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>'
+            '</svg>Chat</button>'
+        ) if run_id else "",
     }
     return render_template(os.path.join(templates_dir, "base.html"), base_vars)
 
@@ -1134,15 +1156,18 @@ def render_overview(review, templates_dir, back_url="/",
     """Render the overview page and return the full HTML string."""
     content, v = _build_overview_html(review, templates_dir, github_data=github_data, run_id=run_id)
     return _wrap_base(content, v, templates_dir, page="overview", back_url=back_url,
-                      nav_overview_url=nav_overview_url, nav_repos_url=nav_repos_url)
+                      nav_overview_url=nav_overview_url, nav_repos_url=nav_repos_url,
+                      run_id=run_id)
 
 
 def render_repos(review, templates_dir, back_url="/",
-                 nav_overview_url="index.html", nav_repos_url="repos.html"):
+                 nav_overview_url="index.html", nav_repos_url="repos.html",
+                 run_id=None):
     """Render the repos page and return the full HTML string."""
     content, v = _build_repos_html(review, templates_dir)
     return _wrap_base(content, v, templates_dir, page="repos", extra_css=REPOS_EXTRA_CSS, back_url=back_url,
-                      nav_overview_url=nav_overview_url, nav_repos_url=nav_repos_url)
+                      nav_overview_url=nav_overview_url, nav_repos_url=nav_repos_url,
+                      run_id=run_id)
 
 
 def generate(review, templates_dir, output_dir=None, github_data=None):
